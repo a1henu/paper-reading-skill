@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!--
+  INDEX / NAVIGATION TEMPLATE (requirement #6: pure navigation, separate from reports).
+  Lives at <topic>/index.html . style.css at assets/style.css .
+  One <a class="card"> per paper report, plus comparison cards. Regenerate each run.
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TOPIC}} — Paper Reading 索引</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="hero">
+  <h1>{{TOPIC_DISPLAY_NAME}}</h1>
+  <p>{{一句话主题描述}} · 共 {{N}} 篇</p>
+</div>
+
+<!-- ===== Comparison pages (if any) ===== -->
+<div class="section-title">对比解读</div>
+<div class="card-grid">
+  <a class="card" href="comparisons/{{COMPARISON_SLUG}}.html">
+    <span class="tag cmp">对比</span>
+    <h3>{{对比页标题}}</h3>
+    <p>{{讲解了哪些文章的关系}}</p>
+  </a>
+</div>
+
+<!-- ===== Per-paper reports ===== -->
+<div class="section-title">单篇解读</div>
+<div class="card-grid">
+  <a class="card" href="reports/{{PAPER_SLUG}}.html">
+    <span class="tag">{{领域标签}}</span>
+    <h3>{{PAPER_SHORT_NAME}}</h3>
+    <p>{{一句话中文摘要}}</p>
+    <div class="venue">{{VENUE_YEAR}}</div>
+  </a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--
+  COMPARISON TEMPLATE (requirement #5: only when ≥2 related papers).
+  Lives at <topic>/comparisons/<comparison-slug>.html . style.css at ../assets/style.css .
+  Explain the RELATIONSHIP: evolution / complement / competition.
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{COMPARISON_TITLE}} — 对比解读</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+<script>
+  MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<header class="meta-bar">
+  <h1>{{COMPARISON_TITLE}}</h1>
+  <div class="authors">对比文章：{{PAPER_A}} · {{PAPER_B}} · ...</div>
+  <nav class="meta-links">
+    <a href="../index.html">← 返回索引</a>
+    <a href="../reports/{{PAPER_A_SLUG}}.html">{{PAPER_A}} 解读</a>
+    <a href="../reports/{{PAPER_B_SLUG}}.html">{{PAPER_B}} 解读</a>
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <section>
+    <h2>1. 它们是什么关系</h2>
+    <p>{{演进 / 互补 / 竞争 的中文叙述}}</p>
+  </section>
+
+  <section>
+    <h2>2. 演进脉络</h2>
+    <div class="mermaid">
+graph LR
+    A[{{PAPER_A}}] -->|{{解决了A的什么不足}}| B[{{PAPER_B}}]
+    B -->|...| C[{{PAPER_C}}]
+    </div>
+  </section>
+
+  <section>
+    <h2>3. 逐项对比</h2>
+    <table class="cmp-table">
+      <thead>
+        <tr><th>维度</th><th>{{PAPER_A}}</th><th>{{PAPER_B}}</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>核心思想</td><td>{{}}</td><td>{{}}</td></tr>
+        <tr><td>方法</td><td>{{}}</td><td>{{}}</td></tr>
+        <tr><td>数据集</td><td>{{}}</td><td>{{}}</td></tr>
+        <tr><td>关键指标</td><td>{{}}</td><td>{{}}</td></tr>
+        <tr><td>算力</td><td>{{}}</td><td>{{}}</td></tr>
+        <tr><td>优势 / 局限</td><td>{{}}</td><td>{{}}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>4. 发展逻辑与取舍</h2>
+    <p>{{为什么领域会这样演进；各自适合什么场景}}</p>
+  </section>
+
+</main>
+</body>
+</html>

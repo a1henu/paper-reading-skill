@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<!--
+  PER-PAPER REPORT TEMPLATE.
+  Fill in every {{PLACEHOLDER}}. Delete sections that genuinely don't apply, but keep the order.
+  Prose: 中文. Terms: English OK. File lives at <topic>/reports/<paper-slug>.html
+  -> style.css is at ../assets/style.css ; figures at ../assets/<paper-slug>/...
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{PAPER_SHORT_NAME}} — 解读</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script>
+  MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] } };
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+</head>
+<body>
+
+<!-- ============ METADATA BAR (requirement #4) ============ -->
+<header class="meta-bar">
+  <h1>{{PAPER_FULL_TITLE}}</h1>
+  <div class="authors">{{AUTHORS}} · {{AFFILIATION}} · {{VENUE_YEAR}}</div>
+  <nav class="meta-links">
+    <a href="{{ARXIV_URL}}" target="_blank">📄 arXiv / PDF</a>
+    <a href="{{CODE_REPO_URL}}" target="_blank">💻 Code</a>
+    <a href="{{CHECKPOINT_URL}}" target="_blank">🧠 Checkpoints</a>
+    <a href="{{PROJECT_PAGE_URL}}" target="_blank">🌐 Project page</a>
+    <a href="{{DATASET_URL}}" target="_blank">🗂️ Dataset</a>
+    <!-- mark unavailable links with class="disabled" instead of deleting -->
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <div class="toc">
+    <strong>目录</strong>
+    <ol>
+      <li><a href="#speedread">5 分钟速读</a></li>
+      <li><a href="#tldr">TL;DR</a></li>
+      <li><a href="#intro">Intro & Motivation</a></li>
+      <li><a href="#lineage">相关工作与发展脉络</a></li>
+      <li><a href="#method">方法与公式详解</a></li>
+      <li><a href="#exp">实验</a></li>
+      <li><a href="#viz">效果可视化</a></li>
+      <li><a href="#repro">复现指南</a></li>
+    </ol>
+  </div>
+
+  <!-- ============ 5-MINUTE SPEED READ (fast comprehension) ============ -->
+  <section id="speedread">
+    <div class="callout good">
+      <div class="label">⏱️ 如果你只有 5 分钟</div>
+      <ul>
+        <li><strong>一句话：</strong>{{这篇文章做了什么、核心 insight}}</li>
+        <li><strong>解决的痛点：</strong>{{现有方法的 gap}}</li>
+        <li><strong>关键做法：</strong>{{方法一句话}}</li>
+        <li><strong>效果：</strong>{{最重要的一个数字/结论}}</li>
+        <li><strong>能拿来干嘛：</strong>{{对你/工程上的价值，有无可用代码与权重}}</li>
+      </ul>
+    </div>
+    <!-- 核心一张图：整篇文章最该先看的那张图（原图抽取或重绘） -->
+    <figure>
+      <img src="../assets/{{PAPER_SLUG}}/key-figure.png" alt="key figure">
+      <figcaption>核心图：{{为什么这张图最重要，一眼看懂全文}}</figcaption>
+    </figure>
+  </section>
+
+  <section id="tldr">
+    <div class="tldr">
+      <div class="label">TL;DR</div>
+      {{THREE_TO_FIVE_SENTENCE_CHINESE_SUMMARY}}
+    </div>
+  </section>
+
+  <section id="intro">
+    <h2>1. Intro & Motivation</h2>
+    <p>{{要解决什么问题、为什么重要、现有方法的 gap}}</p>
+    <div class="takeaway">{{一句话总结本节}}</div>
+  </section>
+
+  <section id="lineage">
+    <h2>2. 相关工作与发展脉络</h2>
+    <p>{{这篇文章在领域中的位置；前序→本文→后续}}</p>
+    <div class="mermaid">
+timeline
+    title {{领域}} 发展脉络
+    {{年份}} : {{前序工作}}
+    {{年份}} : {{本文}}
+    {{年份}} : {{后续影响}}
+    </div>
+  </section>
+
+  <section id="method">
+    <h2>3. 方法与公式详解</h2>
+    <p>{{方法总览}}</p>
+
+    <!-- architecture figure: extracted original OR redrawn mermaid -->
+    <figure>
+      <img src="../assets/{{PAPER_SLUG}}/architecture.png" alt="architecture">
+      <figcaption>图 1：{{架构图中文说明}}</figcaption>
+    </figure>
+
+    <h3>3.1 {{核心公式}}</h3>
+    <div class="eq">$$ {{LATEX_EQUATION}} $$</div>
+    <p>{{逐符号中文解释：每个符号含义、为什么这样设计、直觉}}</p>
+    <div class="takeaway">{{一句话总结方法核心}}</div>
+  </section>
+
+  <section id="exp">
+    <h2>4. 实验</h2>
+    <p><strong>设置：</strong>{{数据集、baseline、指标、算力}}</p>
+    <table>
+      <thead><tr><th>Method</th><th class="num">{{Metric}}</th></tr></thead>
+      <tbody>
+        <tr><td>{{Baseline}}</td><td class="num">{{x}}</td></tr>
+        <tr><td>{{本文}}</td><td class="num best">{{y}}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="viz">
+    <h2>5. 效果可视化</h2>
+    <figure>
+      <img src="../assets/{{PAPER_SLUG}}/results.png" alt="results">
+      <figcaption>图 2：{{效果图中文说明}}</figcaption>
+    </figure>
+  </section>
+
+  <section id="repro">
+    <h2>6. 复现指南</h2>
+
+    <!-- QUICK START: 最少命令跑起来，服务"快速上手" -->
+    <div class="callout good">
+      <div class="label">🚀 快速上手（最少命令跑起来）</div>
+      <pre><code>{{git clone ...
+cd repo && {{一行装环境}}
+{{一行下载/加载权重}}
+{{一行跑 demo/推理，看到输出}}}}</code></pre>
+      <p>{{这串命令能让你看到什么；跑通的最低门槛 GPU/显存}}</p>
+    </div>
+
+    <div class="callout">
+      <div class="label">资源汇总</div>
+      <ul>
+        <li>代码仓库：<a href="{{CODE_REPO_URL}}" target="_blank">{{repo}}</a> {{official? stars?}}</li>
+        <li>权重 / Checkpoints：<a href="{{CHECKPOINT_URL}}" target="_blank">{{ckpt}}</a></li>
+        <li>数据集：<a href="{{DATASET_URL}}" target="_blank">{{dataset}}</a></li>
+      </ul>
+    </div>
+    <h3>环境与依赖</h3>
+    <pre><code>{{install commands}}</code></pre>
+    <h3>训练 / 推理</h3>
+    <pre><code>{{train / inference commands}}</code></pre>
+    <h3>算力需求与踩坑</h3>
+    <div class="callout warn">
+      <div class="label">注意</div>
+      {{VRAM / GPU 数量 / 已知坑}}
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

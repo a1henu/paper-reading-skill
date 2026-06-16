@@ -1,9 +1,26 @@
 <!DOCTYPE html>
 <!--
   PER-PAPER REPORT TEMPLATE.
-  Fill in every {{PLACEHOLDER}}. Delete sections that genuinely don't apply, but keep the order.
-  Prose: 中文. Terms: English OK. File lives at <topic>/reports/<paper-slug>.html
+  Goal: a reader should grasp the WHOLE paper by reading this report alone, smoothly,
+  top to bottom — only opening the original PDF when they hit something they want to
+  dig deeper on. So: explain intuition BEFORE math, define every symbol, walk a concrete
+  example, add smooth transitions, answer the obvious questions, and tuck heavy detail
+  into collapsible "深入" blocks so the main line stays readable.
+
+  Fill in every {{PLACEHOLDER}}. Delete a section ONLY if it genuinely doesn't apply
+  (keep the order). Prose: 中文. Terms: English OK. File lives at <topic>/reports/<paper-slug>.html
   -> style.css is at ../assets/style.css ; figures at ../assets/<paper-slug>/...
+
+  HOW TO USE THE REUSABLE BLOCKS (copy & repeat as needed):
+  - .intuition  : 先讲直觉/打比方，放在每个难点公式或模块之前
+  - .eq-card    : 一个公式的完整卡片（公式 + 是什么 / 为什么这样设计 / 直觉 三段）
+  - .notation   : 方法开始前的符号总表，读者随时回查
+  - <details class="dig"> : 「深入（可跳过）」折叠块，收纳推导/证明/边角细节
+  - .walkthrough + .step  : 拿一个具体小例子端到端走一遍方法
+  - .bridge     : 段落之间的承上启下过渡句（保持阅读顺滑）
+  - .faq        : 读到这里读者最可能冒出的问题 + 解答
+  - .keynum     : 超大关键数字，一眼抓住最重要的结果
+  - .glossary   : 文末术语表
 -->
 <html lang="zh-CN">
 <head>
@@ -34,21 +51,28 @@
   </nav>
 </header>
 
-<main class="wrap">
+<!-- floating table of contents (auto-highlights current section via :target/scroll) -->
+<nav class="toc-float">
+  <strong>目录</strong>
+  <ol>
+    <li><a href="#speedread">5 分钟速读</a></li>
+    <li><a href="#tldr">TL;DR</a></li>
+    <li><a href="#intro">问题与动机</a></li>
+    <li><a href="#lineage">发展脉络</a></li>
+    <li><a href="#bigpicture">方法总览</a></li>
+    <li><a href="#notation">符号表</a></li>
+    <li><a href="#method">方法详解</a></li>
+    <li><a href="#walkthrough">走一遍例子</a></li>
+    <li><a href="#exp">实验</a></li>
+    <li><a href="#viz">效果可视化</a></li>
+    <li><a href="#limits">局限与讨论</a></li>
+    <li><a href="#faq">常见疑问</a></li>
+    <li><a href="#repro">复现指南</a></li>
+    <li><a href="#glossary">术语表</a></li>
+  </ol>
+</nav>
 
-  <div class="toc">
-    <strong>目录</strong>
-    <ol>
-      <li><a href="#speedread">5 分钟速读</a></li>
-      <li><a href="#tldr">TL;DR</a></li>
-      <li><a href="#intro">Intro & Motivation</a></li>
-      <li><a href="#lineage">相关工作与发展脉络</a></li>
-      <li><a href="#method">方法与公式详解</a></li>
-      <li><a href="#exp">实验</a></li>
-      <li><a href="#viz">效果可视化</a></li>
-      <li><a href="#repro">复现指南</a></li>
-    </ol>
-  </div>
+<main class="wrap">
 
   <!-- ============ 5-MINUTE SPEED READ (fast comprehension) ============ -->
   <section id="speedread">
@@ -62,6 +86,14 @@
         <li><strong>能拿来干嘛：</strong>{{对你/工程上的价值，有无可用代码与权重}}</li>
       </ul>
     </div>
+
+    <!-- 超大关键数字：最该被记住的 1-3 个结果 -->
+    <div class="keynum-row">
+      <div class="keynum"><div class="n">{{+X%}}</div><div class="cap">{{相对 baseline 的提升}}</div></div>
+      <div class="keynum"><div class="n">{{Y×}}</div><div class="cap">{{速度/效率倍数}}</div></div>
+      <div class="keynum"><div class="n">{{Z}}</div><div class="cap">{{另一个核心指标}}</div></div>
+    </div>
+
     <!-- 核心一张图：整篇文章最该先看的那张图（原图抽取或重绘） -->
     <figure>
       <img src="../assets/{{PAPER_SLUG}}/key-figure.png" alt="key figure">
@@ -77,14 +109,22 @@
   </section>
 
   <section id="intro">
-    <h2>1. Intro & Motivation</h2>
-    <p>{{要解决什么问题、为什么重要、现有方法的 gap}}</p>
+    <h2>1. 问题与动机</h2>
+    <p>{{要解决什么问题、为什么重要}}</p>
+
+    <!-- 用一个生活化类比或场景，让外行也能 get 到痛点 -->
+    <div class="intuition">
+      <div class="label">打个比方</div>
+      <p>{{用类比/具体场景说清楚这个问题有多难、为什么现有办法不够}}</p>
+    </div>
+
+    <p><strong>现有方法的 gap（具体说，别泛泛）：</strong>{{不是"有局限"，而是"X 方法需要 A，但现实只能拿到 B，所以失效"}}</p>
     <div class="takeaway">{{一句话总结本节}}</div>
   </section>
 
   <section id="lineage">
     <h2>2. 相关工作与发展脉络</h2>
-    <p>{{这篇文章在领域中的位置；前序→本文→后续}}</p>
+    <p>{{把脉络讲成一个故事：A 提出 X → B 发现 X 在 Y 场景失效 → 本文用 Z 解决 → 启发了 W}}</p>
     <div class="mermaid">
 timeline
     title {{领域}} 发展脉络
@@ -92,26 +132,99 @@ timeline
     {{年份}} : {{本文}}
     {{年份}} : {{后续影响}}
     </div>
+    <div class="takeaway">{{本文在脉络里的位置，一句话}}</div>
   </section>
 
+  <!-- ============ BIG PICTURE: 先建立全局直觉，再进公式 ============ -->
+  <section id="bigpicture">
+    <h2>3. 方法总览（先建立直觉）</h2>
+    <p>{{在任何公式之前，用 2-3 段大白话讲清楚整个方法在干什么、分几步、数据怎么流动。读者带着这个全局图再去看细节就不会迷路。}}</p>
+
+    <div class="intuition">
+      <div class="label">核心 idea 一句话</div>
+      <p>{{把全文最关键的那个 insight 用最朴素的话说出来——为什么这么做就能解决前面的 gap}}</p>
+    </div>
+
+    <!-- 方法数据流：重绘的流程图，让人看到输入怎么一步步变成输出 -->
+    <div class="mermaid">
+flowchart TB
+    x[{{输入}}] --> a[{{步骤1}}] --> b[{{步骤2}}] --> y[{{输出}}]
+    </div>
+    <figcaption class="mermaid-cap">图：{{整体数据流，对照下面各步细节阅读}}</figcaption>
+  </section>
+
+  <!-- ============ NOTATION TABLE: 符号总表，随时回查 ============ -->
+  <section id="notation">
+    <h2>4. 符号表</h2>
+    <p>下面方法部分会用到这些符号，看公式卡住时回来查。</p>
+    <table class="notation">
+      <thead><tr><th>符号</th><th>含义</th><th>维度 / 取值</th></tr></thead>
+      <tbody>
+        <tr><td>$x$</td><td>{{含义}}</td><td>{{shape}}</td></tr>
+        <tr><td>$\theta$</td><td>{{含义}}</td><td>{{shape}}</td></tr>
+        <!-- 列全方法里出现的所有关键符号 -->
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============ METHOD: 逐模块，每个难点先直觉后公式 ============ -->
   <section id="method">
-    <h2>3. 方法与公式详解</h2>
-    <p>{{方法总览}}</p>
+    <h2>5. 方法详解</h2>
 
     <!-- architecture figure: extracted original OR redrawn mermaid -->
     <figure>
       <img src="../assets/{{PAPER_SLUG}}/architecture.png" alt="architecture">
-      <figcaption>图 1：{{架构图中文说明}}</figcaption>
+      <figcaption>图 1：{{架构图中文说明——指出图里每个块对应下面哪一小节}}</figcaption>
     </figure>
 
-    <h3>3.1 {{核心公式}}</h3>
-    <div class="eq">$$ {{LATEX_EQUATION}} $$</div>
-    <p>{{逐符号中文解释：每个符号含义、为什么这样设计、直觉}}</p>
-    <div class="takeaway">{{一句话总结方法核心}}</div>
+    <h3>5.1 {{模块名}}</h3>
+
+    <!-- 先讲直觉：这个模块为什么存在、想达成什么 -->
+    <div class="intuition">
+      <div class="label">先理解：这一步在干嘛</div>
+      <p>{{用大白话讲这个模块的目的和直觉，不出现公式}}</p>
+    </div>
+
+    <!-- 再上公式：一个 eq-card 一个公式，三段式拆解 -->
+    <div class="eq-card">
+      <div class="eq">$$ {{LATEX_EQUATION}} $$</div>
+      <dl class="eq-explain">
+        <dt>是什么</dt><dd>{{这个式子在算什么，左右两边分别代表什么}}</dd>
+        <dt>逐符号</dt><dd>{{$符号$ = …；$符号$ = …；逐个点名，链接回符号表}}</dd>
+        <dt>为什么这样设计</dt><dd>{{为什么用这个形式而不是别的；如果是 loss，说它把什么推高/压低}}</dd>
+        <dt>直觉</dt><dd>{{一句话的 takeaway——这个公式想表达的朴素含义}}</dd>
+      </dl>
+    </div>
+
+    <!-- 推导/证明/超参细节等，折叠收纳，主线不被打断 -->
+    <details class="dig">
+      <summary>深入（可跳过）：{{推导 / 证明 / 实现细节}}</summary>
+      <p>{{想深究的读者看这里；不看也不影响理解主线}}</p>
+    </details>
+
+    <div class="bridge">{{承上启下：上一步得到了 X，但还差 Y，于是下一步……}}</div>
+
+    <h3>5.2 {{下一个模块}}</h3>
+    <p>{{重复上面的 intuition → eq-card → (dig) → bridge 结构}}</p>
+
+    <div class="takeaway">{{一句话总结整个方法的核心机制}}</div>
+  </section>
+
+  <!-- ============ WORKED EXAMPLE: 拿一个具体小输入端到端走一遍 ============ -->
+  <section id="walkthrough">
+    <h2>6. 走一遍例子</h2>
+    <p>{{用一个最小的具体输入，把方法从头到尾跑一遍——抽象公式立刻变具体。}}</p>
+    <ol class="walkthrough">
+      <li class="step"><strong>输入：</strong>{{具体的一个例子，给出实际数值/句子/图像}}</li>
+      <li class="step"><strong>{{步骤1}}：</strong>{{这一步对例子做了什么，得到什么中间结果}}</li>
+      <li class="step"><strong>{{步骤2}}：</strong>{{继续，给出中间数值/状态}}</li>
+      <li class="step"><strong>输出：</strong>{{最终结果，并点出"看，这正是我们想要的"}}</li>
+    </ol>
   </section>
 
   <section id="exp">
-    <h2>4. 实验</h2>
+    <h2>7. 实验</h2>
+    <p><strong>怎么读这张表：</strong>{{先告诉读者该盯着哪一列、哪一行、看出什么结论}}</p>
     <p><strong>设置：</strong>{{数据集、baseline、指标、算力}}</p>
     <table>
       <thead><tr><th>Method</th><th class="num">{{Metric}}</th></tr></thead>
@@ -120,18 +233,48 @@ timeline
         <tr><td>{{本文}}</td><td class="num best">{{y}}</td></tr>
       </tbody>
     </table>
+    <div class="takeaway">{{从实验里读出的核心结论，而不是复述数字}}</div>
+
+    <details class="dig">
+      <summary>深入（可跳过）：消融实验与更多结果</summary>
+      <p>{{ablation 说明了哪个组件最关键；其它次要表格}}</p>
+    </details>
   </section>
 
   <section id="viz">
-    <h2>5. 效果可视化</h2>
+    <h2>8. 效果可视化</h2>
     <figure>
       <img src="../assets/{{PAPER_SLUG}}/results.png" alt="results">
-      <figcaption>图 2：{{效果图中文说明}}</figcaption>
+      <figcaption>图 2：{{效果图中文说明——指出该看哪里、好在哪里}}</figcaption>
     </figure>
   </section>
 
+  <!-- ============ LIMITS & DISCUSSION: 诚实的边界 ============ -->
+  <section id="limits">
+    <h2>9. 局限与讨论</h2>
+    <ul>
+      <li><strong>适用边界：</strong>{{什么情况下有效，什么情况下不灵}}</li>
+      <li><strong>代价：</strong>{{算力/数据/工程上的成本}}</li>
+      <li><strong>作者自己承认的不足：</strong>{{paper 里提到的 limitation}}</li>
+      <li><strong>开放问题：</strong>{{留给后续工作的坑}}</li>
+    </ul>
+  </section>
+
+  <!-- ============ FAQ: 读者读到这里最可能冒出的问题 ============ -->
+  <section id="faq">
+    <h2>10. 常见疑问</h2>
+    <div class="faq">
+      <details><summary>{{读者最容易困惑的问题1，例如"它和 XX 方法有什么区别？"}}</summary>
+        <p>{{解答}}</p></details>
+      <details><summary>{{问题2，例如"为什么不直接用更简单的做法？"}}</summary>
+        <p>{{解答}}</p></details>
+      <details><summary>{{问题3，例如"这个假设现实里成立吗？"}}</summary>
+        <p>{{解答}}</p></details>
+    </div>
+  </section>
+
   <section id="repro">
-    <h2>6. 复现指南</h2>
+    <h2>11. 复现指南</h2>
 
     <!-- QUICK START: 最少命令跑起来，服务"快速上手" -->
     <div class="callout good">
@@ -160,6 +303,15 @@ cd repo && {{一行装环境}}
       <div class="label">注意</div>
       {{VRAM / GPU 数量 / 已知坑}}
     </div>
+  </section>
+
+  <!-- ============ GLOSSARY: 文末术语表，遇到生词随时回查 ============ -->
+  <section id="glossary">
+    <h2>12. 术语表</h2>
+    <dl class="glossary">
+      <dt>{{术语 / 缩写}}</dt><dd>{{一句话中文解释}}</dd>
+      <dt>{{术语 / 缩写}}</dt><dd>{{一句话中文解释}}</dd>
+    </dl>
   </section>
 
 </main>

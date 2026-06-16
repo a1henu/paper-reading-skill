@@ -131,7 +131,7 @@ figcaption { color: var(--text-dim); font-size: 0.85rem; margin-top: 10px; }
 /* ---------- Equation block ---------- */
 .eq { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px 16px; margin: 18px 0; overflow-x: auto; }
 
-/* ---------- TOC ---------- */
+/* ---------- TOC (legacy inline, still works) ---------- */
 .toc {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -143,6 +143,156 @@ figcaption { color: var(--text-dim); font-size: 0.85rem; margin-top: 10px; }
 .toc ol { margin: 8px 0 0; padding-left: 20px; }
 .toc a { text-decoration: none; }
 .toc a:hover { text-decoration: underline; }
+
+/* ---------- Floating TOC (sidebar on wide screens) ---------- */
+.toc-float {
+  position: fixed;
+  top: 130px;
+  left: max(16px, calc((100vw - var(--max-w)) / 2 - 220px));
+  width: 200px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: .82rem;
+  z-index: 30;
+}
+.toc-float strong { display: block; font-size: .72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+.toc-float ol { margin: 0; padding-left: 18px; line-height: 1.9; }
+.toc-float a { text-decoration: none; color: var(--text-dim); }
+.toc-float a:hover { color: var(--accent); text-decoration: underline; }
+/* hide the floating TOC when the viewport is too narrow to fit it beside content */
+@media (max-width: 1340px) { .toc-float { display: none; } }
+
+/* ---------- Intuition / analogy box (先讲直觉) ---------- */
+.intuition {
+  background: linear-gradient(0deg, var(--surface), var(--surface));
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent-2);
+  border-radius: 10px;
+  padding: 14px 20px;
+  margin: 20px 0;
+}
+.intuition .label { font-weight: 600; font-size: .8rem; color: var(--accent-2); margin-bottom: 4px; }
+.intuition .label::before { content: "💭 "; }
+.intuition p { margin: 6px 0 0; }
+
+/* ---------- Equation card (公式三段式) ---------- */
+.eq-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 6px 20px 18px;
+  margin: 22px 0;
+}
+.eq-card .eq { background: none; border: none; padding: 8px 0; margin: 8px 0 4px; }
+.eq-explain { margin: 0; }
+.eq-explain dt {
+  font-weight: 600;
+  font-size: .82rem;
+  color: var(--accent);
+  margin-top: 12px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.eq-explain dd { margin: 4px 0 0; padding-left: 0; }
+
+/* ---------- Notation table ---------- */
+table.notation td:first-child, table.notation th:first-child { width: 22%; font-family: var(--mono); }
+table.notation td:first-child { color: var(--accent); }
+
+/* ---------- "深入（可跳过）" collapsible (keeps main line readable) ---------- */
+details.dig {
+  background: var(--surface-2);
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 4px 18px;
+  margin: 18px 0;
+}
+details.dig > summary {
+  cursor: pointer;
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  padding: 10px 0;
+  list-style: none;
+}
+details.dig > summary::-webkit-details-marker { display: none; }
+details.dig > summary::before { content: "▸ "; color: var(--accent); }
+details.dig[open] > summary::before { content: "▾ "; }
+details.dig[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+details.dig > *:not(summary) { font-size: .94rem; }
+
+/* ---------- Bridge sentence (承上启下过渡) ---------- */
+.bridge {
+  margin: 22px 0;
+  padding: 4px 0 4px 16px;
+  border-left: 3px solid var(--accent);
+  color: var(--text-dim);
+  font-style: italic;
+}
+.bridge::before { content: "↪ "; font-style: normal; color: var(--accent); }
+
+/* ---------- Worked-example walkthrough (走一遍例子) ---------- */
+ol.walkthrough { counter-reset: step; list-style: none; padding-left: 0; margin: 20px 0; }
+ol.walkthrough .step {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px 14px 52px;
+  margin: 10px 0;
+}
+ol.walkthrough .step::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 14px; top: 14px;
+  width: 26px; height: 26px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .82rem; font-weight: 700;
+}
+
+/* ---------- Big key numbers (一眼抓住核心结果) ---------- */
+.keynum-row { display: flex; flex-wrap: wrap; gap: 16px; margin: 24px 0; }
+.keynum {
+  flex: 1 1 140px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 12px;
+  padding: 18px 16px;
+  text-align: center;
+}
+.keynum .n { font-size: 2.2rem; font-weight: 800; color: var(--accent); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.keynum .cap { color: var(--text-dim); font-size: .82rem; margin-top: 6px; }
+
+/* ---------- FAQ ---------- */
+.faq details {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px 18px;
+  margin: 10px 0;
+  background: var(--surface);
+}
+.faq summary { cursor: pointer; font-weight: 600; padding: 10px 0; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::before { content: "❓ "; }
+.faq details[open] summary { border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.faq p { margin: 8px 0; }
+
+/* ---------- Glossary ---------- */
+dl.glossary { margin: 16px 0; }
+dl.glossary dt { font-weight: 700; color: var(--accent); margin-top: 14px; }
+dl.glossary dd { margin: 2px 0 0; padding-left: 0; color: var(--text); }
+
+/* ---------- Mermaid caption ---------- */
+.mermaid-cap { color: var(--text-dim); font-size: 0.85rem; text-align: center; margin: -12px 0 24px; }
 
 /* ---------- Index page cards ---------- */
 .hero { text-align: center; padding: 48px 24px 24px; }

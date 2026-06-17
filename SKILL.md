@@ -20,7 +20,7 @@ The report must let the reader **grasp the whole paper by reading it alone, smoo
 ## Configured defaults (this install)
 
 - **Charts**: combine extracted original figures with redrawn code charts. Extract key original figures from the PDF where feasible; redraw lineage/timeline/comparison/perf curves as Mermaid / inline SVG.
-- **Resource search**: search broadly (GitHub, HuggingFace, project page, datasets, blogs) and aggregate links into the metadata bar + reproduction guide. **Never clone, run, or execute code** — the reproduction guide is *organized reference* (commands quoted from the README/docs), not something you test by running. Only `pdfimages`/`pdftoppm` for figure extraction is allowed as a local command.
+- **Resource search**: search broadly (GitHub, HuggingFace, project page, datasets, blogs) and aggregate links into the metadata bar + reproduction guide. **Never clone, run, or execute code** — the reproduction guide is *organized reference* (commands quoted from the README/docs), not something you test by running. The only local commands allowed are the bundled figure extractor (`scripts/extract_figures.py`) and, as a fallback, `pdftoppm` for whole-page renders.
 - **Output layout**: per-topic folder `./<topic>/` in the current working directory.
 
 ## Output structure
@@ -65,7 +65,7 @@ The goal: help the reader understand the gist fast, correctly, and get hands-on 
    - `walkthrough` — run one tiny concrete input end-to-end through the method with real intermediate values.
    - `experiments` — result tables + redrawn charts + a `.keynum-row` of the 1-3 headline numbers; say what to look at.
    - `resources+repro` — sweep GitHub/HF/datasets, read repo README + issues, **organize** the setup/train/inference commands as a copy-pasteable Quick Start (quote them from the README, do **not** run or clone).
-   - `figures` — extract key figures via pdfimages/pdftoppm + 中文 captions that *interpret* the figure.
+   - `figures` — extract key figures with the bundled `scripts/extract_figures.py` (caption-anchored, gets exact figure boundaries — NOT pdfimages/pdftoppm), **view every extracted PNG**, then select + write 中文 captions that *interpret* the figure.
    - `faq+limits+glossary` — the 2-4 questions a reader naturally hits, an honest局限与讨论, and a术语表.
 
    Each returns its section's HTML fragment (or structured content) — not a whole file.
@@ -116,10 +116,13 @@ Read the full paper. Extract and understand:
 - **Experiments**: setup (datasets, baselines, metrics, compute), key result tables, ablations. Reproduce the **key result tables** as HTML tables and **redraw key trends** as charts.
 - **Figures**: extract the paper's key figures (architecture diagram, main results) into `assets/<paper-slug>/` and embed; redraw conceptual/lineage/comparison figures as code charts.
 
-To extract figures from a PDF, try (in order, whichever is available):
-- `pdfimages -png <pdf> <prefix>` (poppler) then pick relevant images, OR
-- `pdftoppm -png -r 150 -f <pg> -l <pg> <pdf> <prefix>` to rasterize specific pages.
-- If no tool is available, skip extraction and redraw the figure as a code chart instead; note this in the report.
+To extract figures from a PDF, **use the bundled caption-anchored extractor** — it locates each "Figure N" caption and crops the exact figure region (clustering the graphics above the caption within its column), which gets the boundaries right where `pdfimages` (fragments) and `pdftoppm` (whole-page, caption bleed) get them wrong:
+
+```bash
+python3 ~/.claude/skills/paper-reading/scripts/extract_figures.py "paper.pdf" assets/<slug> --dpi 200
+```
+
+It writes `fig<N>_p<page>.png` + a `fig<N>_p<page>.txt` caption sidecar for each figure, plus a `manifest.json` (with the **full untruncated caption** per figure). Then **view every extracted PNG** (Read tool) to confirm the crop is complete and clean, select the ones the report needs, write a 中文 figcaption interpreting each, and embed the figure's original caption right after it inside a collapsed `<details class="orig-cap">📄 原文 caption</details>` (the manifest's `caption` / `.txt` sidecar gives the text; styled in `style.css`). For figures marked `no-gfx`/`too-small`, re-run with `--full-pages`, view the page, and crop by hand. See `reference/workflow.md` §"Figure handling" for the full procedure. If PyMuPDF is missing, fall back to `pdftoppm -png -r 200 -f <pg> -l <pg>` and crop manually, or redraw and note "原图未精确抽取".
 
 ### Phase 3 — Generate per-paper report
 Use `templates/report.html` as the structure. One self-contained HTML file per paper at `reports/<paper-slug>.html`. The guiding test: **a reader should follow the whole main line without opening the PDF**. Must contain, top to bottom:

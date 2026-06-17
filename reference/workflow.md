@@ -44,14 +44,52 @@ The report template ships reusable blocks. Reach for them like this:
 Extract original figures for: architecture diagrams, qualitative result samples, main quantitative plots that are hard to redraw.
 Redraw as Mermaid/SVG for: timelines, lineage graphs, method-comparison schematics, simple bar/line trends from result tables.
 
-PDF figure extraction commands (check availability with `which pdfimages pdftoppm`):
+### Use the bundled extractor — NOT `pdfimages` / `pdftoppm`
+
+ML-paper figures are composites of many image tiles + vector drawings laid out
+around the text. `pdfimages` returns dozens of fragments (and nothing for
+vector diagrams); `pdftoppm` rasterises a whole page, so captions and
+neighbouring figures bleed into the crop. Both produce the wrong boundaries.
+
+Instead run the caption-anchored extractor shipped with this skill. It finds
+each "Figure N" caption, clusters the graphics directly above it within that
+column, and crops the exact figure region:
+
 ```bash
-# extract all embedded raster images
-pdfimages -png paper.pdf assets/<slug>/fig
-# OR rasterize a specific page (when figure is vector / mixed)
-pdftoppm -png -r 150 -f 3 -l 3 paper.pdf assets/<slug>/page3
+python3 ~/.claude/skills/paper-reading/scripts/extract_figures.py \
+    "paper.pdf" assets/<slug> --dpi 200
+# add --full-pages to also dump whole-page renders as a verification fallback
 ```
-Then crop/select the relevant ones. If neither tool exists, redraw the figure and add a 中文 note: "原图未抽取，以下为重绘示意图".
+
+This writes, for every figure, `fig<N>_p<page>.png` + a `fig<N>_p<page>.txt`
+sidecar holding the figure's **full original caption**, plus a `manifest.json`
+listing `{page, fig, status, file, caption_file, rect, caption}` where `caption`
+is the complete, untruncated caption text. Then:
+
+1. **View every extracted PNG** (Read tool) together with the manifest — confirm
+   each crop is the complete figure with no caption/neighbour bleed and nothing
+   cut off.
+2. **Select** only the figures the report actually needs (teaser, architecture,
+   key qualitative results, main plots); rename them to meaningful slugs
+   (`fig4-arch.png`, `fig1-teaser.png`) when embedding.
+3. The manifest's `caption` field (or the `.txt` sidecar) gives you the figure's
+   complete original English caption. Use it to write an interpretive 中文
+   `<figcaption>` that explains what the figure shows, not just restates it —
+   **and embed the original caption right after it**, collapsed, so the reader
+   can check the source without it cluttering the main line:
+   ```html
+   <figcaption>图 N：{中文解读……}
+     <details class="orig-cap"><summary>📄 原文 caption</summary><p>{原文英文 caption}</p></details>
+   </figcaption>
+   ```
+   (`.orig-cap` is styled in `style.css`; HTML-escape the caption text.)
+4. For any figure marked `no-gfx` / `too-small`, re-run with `--full-pages`, view
+   the page render, and crop by hand via the script's `crop_region(pdf, page,
+   (x0,y0,x1,y1), out)` helper (PDF-point coordinates) if the figure is worth it.
+
+If PyMuPDF is unavailable, fall back to `pdftoppm -png -r 200 -f <pg> -l <pg>`
+for a whole-page render and crop manually, or redraw the figure and add a 中文
+note: "原图未精确抽取，以下为重绘示意图".
 
 Always write a 中文 `<figcaption>` that *interprets* the figure, not just labels it.
 

@@ -14,7 +14,7 @@ For each paper it produces a self-contained HTML report covering:
 
 It also generates a navigation **index page**, and — for ≥2 related papers — a **comparison page** with a lineage diagram and side-by-side table.
 
-Reports are 中文 prose with English file/dir names; charts combine figures extracted from the PDF with redrawn Mermaid / SVG diagrams. The skill never clones or runs code — the reproduction guide is *organized reference*, with commands quoted from the README/docs.
+Reports are 中文 prose with English file/dir names; charts combine figures extracted from the PDF with redrawn Mermaid / SVG diagrams. Original figures are pulled with a bundled **caption-anchored extractor** (`scripts/extract_figures.py`) that crops each figure at its true boundary and saves its full original caption alongside — far cleaner than `pdfimages` (fragments) or whole-page `pdftoppm` (caption bleed). The skill never clones or runs code — the reproduction guide is *organized reference*, with commands quoted from the README/docs.
 
 ## Layout
 
@@ -23,6 +23,8 @@ SKILL.md                 # skill definition + workflow
 reference/
   workflow.md            # detailed per-section guidance
   orchestration.md       # multi-agent fan-out / cluster patterns
+scripts/
+  extract_figures.py     # caption-anchored PDF figure + caption extractor
 templates/
   index.html             # navigation index scaffold
   report.html            # per-paper report scaffold
@@ -37,6 +39,8 @@ Clone into your Claude Code skills directory:
 ```bash
 git clone https://github.com/a1henu/paper-reading-skill.git ~/.claude/skills/paper-reading
 ```
+
+The figure extractor needs [PyMuPDF](https://pymupdf.readthedocs.io/) (`pip install pymupdf`); without it the skill falls back to `pdftoppm` page renders or redrawn diagrams.
 
 Then ask Claude to "解读 / 整理 this paper" (or pass a PDF / arXiv link / title) and the skill activates.
 

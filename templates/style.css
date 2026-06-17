@@ -126,6 +126,11 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 figure { margin: 24px 0; text-align: center; }
 figure img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border); background: #fff; }
 figcaption { color: var(--text-dim); font-size: 0.85rem; margin-top: 10px; }
+/* original (English) paper caption, collapsed under the 中文 figcaption */
+figcaption details.orig-cap { margin-top: 6px; }
+figcaption details.orig-cap summary { cursor: pointer; color: var(--text-dim); font-size: 0.78rem; opacity: 0.8; user-select: none; }
+figcaption details.orig-cap summary:hover { opacity: 1; }
+figcaption details.orig-cap p { margin: 6px 0 0; font-size: 0.78rem; font-style: italic; color: var(--text-dim); line-height: 1.5; }
 .mermaid { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin: 24px 0; text-align: center; }
 
 /* ---------- Equation block ---------- */

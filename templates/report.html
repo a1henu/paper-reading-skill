@@ -97,7 +97,10 @@
     <!-- 核心一张图：整篇文章最该先看的那张图（原图抽取或重绘） -->
     <figure>
       <img src="../assets/{{PAPER_SLUG}}/key-figure.png" alt="key figure">
-      <figcaption>核心图：{{为什么这张图最重要，一眼看懂全文}}</figcaption>
+      <figcaption>核心图：{{为什么这张图最重要，一眼看懂全文}}
+        <!-- 对抽取的原图：附上论文原 caption（extract_figures.py 的 .txt/manifest），默认折叠 -->
+        <details class="orig-cap"><summary>📄 原文 caption</summary><p>{{ORIGINAL_ENGLISH_CAPTION}}</p></details>
+      </figcaption>
     </figure>
   </section>
 
@@ -174,7 +177,9 @@ flowchart TB
     <!-- architecture figure: extracted original OR redrawn mermaid -->
     <figure>
       <img src="../assets/{{PAPER_SLUG}}/architecture.png" alt="architecture">
-      <figcaption>图 1：{{架构图中文说明——指出图里每个块对应下面哪一小节}}</figcaption>
+      <figcaption>图 1：{{架构图中文说明——指出图里每个块对应下面哪一小节}}
+        <details class="orig-cap"><summary>📄 原文 caption</summary><p>{{ORIGINAL_ENGLISH_CAPTION}}</p></details>
+      </figcaption>
     </figure>
 
     <h3>5.1 {{模块名}}</h3>

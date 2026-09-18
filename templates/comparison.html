@@ -10,16 +10,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{COMPARISON_TITLE}} — 对比解读</title>
 <link rel="stylesheet" href="../assets/style.css">
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="../assets/vendor/mermaid.min.js"></script>
 <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
 <script>
   MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
 </script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script async src="../assets/vendor/mathjax/tex-mml-chtml.js"></script>
 </head>
 <body>
 
 <header class="meta-bar">
+  <a class="back-to-index" href="../index.html">← 返回索引</a>
   <h1>{{COMPARISON_TITLE}}</h1>
   <div class="authors">对比文章：{{PAPER_A}} · {{PAPER_B}} · ...</div>
   <nav class="meta-links">

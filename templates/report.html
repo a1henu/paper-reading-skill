@@ -31,14 +31,15 @@
 <script>
   MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] } };
 </script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script async src="../assets/vendor/mathjax/tex-mml-chtml.js"></script>
+<script src="../assets/vendor/mermaid.min.js"></script>
 <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
 </head>
 <body>
 
 <!-- ============ METADATA BAR (requirement #4) ============ -->
 <header class="meta-bar">
+  <a class="back-to-index" href="../index.html">← 返回索引</a>
   <h1>{{PAPER_FULL_TITLE}}</h1>
   <div class="authors">{{AUTHORS}} · {{AFFILIATION}} · {{VENUE_YEAR}}</div>
   <nav class="meta-links">

@@ -159,13 +159,15 @@ Generate/update `index.html` from `templates/index.html`:
 
 ### Phase 6 — Finish
 - Copy `templates/style.css` to `<topic>/assets/style.css` (all HTML links to `../assets/style.css` or `assets/style.css`).
+- Copy `templates/vendor/` to `<topic>/assets/vendor/` (local MathJax + Mermaid; see HTML rules).
 - Tell the user the output path and which file to open first (the index).
-- All HTML must be self-contained enough to open via `file://` (use CDN for MathJax/Mermaid, relative path for style.css).
+- All HTML must be self-contained enough to open via `file://` (local vendor JS, relative path for style.css).
 
 ## HTML rules
 
 - **Light mode only.** All pages use the light palette in `style.css`; never introduce dark backgrounds. Initialize Mermaid with `theme: 'neutral'` (light) — not `'dark'`.
-- Load MathJax (`https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js`) and Mermaid (`https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js`) from CDN.
+- Load MathJax and Mermaid from the local vendor copy shipped with this skill: copy `templates/vendor/` to `<topic>/assets/vendor/`, then reference `../assets/vendor/mathjax/tex-mml-chtml.js` and `../assets/vendor/mermaid.min.js`. **Never use cdn.jsdelivr.net** — it is unusably slow from mainland-China networks, and a synchronous CDN `<script>` in `<head>` blocks page render entirely (white screen).
 - Use the shared `style.css`. Keep reports readable: max-width content column, clear section headers, and the `.toc-float` sidebar (auto-hidden on narrow screens) for navigation.
+- Every report/comparison page starts its `.meta-bar` with `<a class="back-to-index" href="../index.html">← 返回索引</a>` so readers can always get back to the index (templates already include it).
 - Embed extracted figures with `<figure><img><figcaption>` and a 中文 caption explaining the figure.
 - See `reference/workflow.md` for detailed per-section guidance, `reference/orchestration.md` for multi-agent fan-out / cluster patterns, and `templates/` for the HTML scaffolds.

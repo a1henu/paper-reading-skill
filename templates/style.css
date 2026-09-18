@@ -325,3 +325,20 @@ dl.glossary dd { margin: 2px 0 0; padding-left: 0; color: var(--text); }
 
 /* ---------- Comparison ---------- */
 .cmp-table th:first-child { background: var(--surface); }
+
+/* ---------- Back to index (top-left of every sub page) ---------- */
+.back-to-index {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.78rem;
+  transition: color .15s, border-color .15s;
+}
+.back-to-index:hover { color: var(--accent); border-color: var(--accent); }

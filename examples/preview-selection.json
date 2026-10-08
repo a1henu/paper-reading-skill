@@ -1,0 +1,45 @@
+[
+  {
+    "schema_version": 1,
+    "slug": "editable-visual-design",
+    "title": "Editable Visual Design",
+    "authors": ["Junyan Ye", "Wei Liu", "et al."],
+    "year": 2026,
+    "venue": "arXiv",
+    "summary_zh": "先生成视觉参考，再用独立素材与 HTML/CSS 搭建可编辑设计。把创作结果与真实设计过程一起交付。",
+    "tags": ["multimodal", "graphic-design", "llm-agent", "editable-design"],
+    "keywords": ["可编辑海报", "HTML/CSS", "独立图层", "设计回放", "Codex"],
+    "read_at": "2026-09-16",
+    "cover": "assets/editable-visual-design/fig2-workflow.png",
+    "links": {"arxiv": "https://arxiv.org/abs/2609.04034v2", "code": "https://github.com/yejy53/Editable-Design"}
+  },
+  {
+    "schema_version": 1,
+    "slug": "visioncreator",
+    "title": "VisionCreator: A Native Visual-Generation Agentic Model with Understanding, Thinking, Planning and Creation",
+    "authors": ["Jinxiang Lai", "Zexin Lu", "Jiajun He", "et al."],
+    "year": 2026,
+    "venue": "arXiv",
+    "summary_zh": "把理解、思考、规划和工具创作纳入模型训练。结合专家轨迹、渐进微调与虚拟环境中的强化学习。",
+    "tags": ["multimodal", "image-generation", "llm-agent", "reinforcement-learning"],
+    "keywords": ["UTPC", "虚拟工具环境", "渐进微调", "VisGenData", "视觉创作"],
+    "read_at": "2026-07-17",
+    "cover": "assets/visioncreator/fig6-framework.png",
+    "links": {"arxiv": "https://arxiv.org/abs/2603.02681", "code": null}
+  },
+  {
+    "schema_version": 1,
+    "slug": "paper2poster",
+    "title": "Paper2Poster: Towards Multimodal Poster Automation from Scientific Papers",
+    "authors": ["Wei Pang", "Kevin Qinghong Lin", "Xiangru Jian", "Xi He", "Philip Torr"],
+    "year": 2025,
+    "venue": "NeurIPS · Datasets & Benchmarks",
+    "summary_zh": "把长论文压缩为学术海报：解析内容与图像、规划面板布局，再通过视觉反馈逐块修正。",
+    "tags": ["multimodal", "graphic-design", "llm-agent", "benchmark"],
+    "keywords": ["学术海报", "PosterAgent", "多模态上下文压缩", "布局规划", "PaperQuiz"],
+    "read_at": null,
+    "read_date_note": "原报告未记录准确阅读日期；不以建站日推断。",
+    "cover": "assets/paper2poster/fig4-pipeline.png",
+    "links": {"arxiv": "https://arxiv.org/abs/2505.21497", "code": "https://github.com/Paper2Poster/Paper2Poster", "dataset": "https://huggingface.co/datasets/Paper2Poster/Paper2Poster"}
+  }
+]

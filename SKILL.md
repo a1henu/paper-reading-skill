@@ -1,6 +1,6 @@
 ---
 name: paper-reading
-description: Read one or more research papers (PDF / arXiv link / title) and produce in-depth Chinese explainer reports as standalone HTML files — covering intro, motivation, related-work lineage, equation-by-equation method walkthrough, experiments and visualized results, plus a reproduction guide and a full sweep of code repos / checkpoints / datasets. Generates a separate index page, per-paper report pages, and (for ≥2 related papers) a comparison page. Use when the user asks to read/解读/整理 a paper or papers.
+description: Read research papers (PDF / arXiv / title) and produce illustrated Chinese HTML reports with source-linked figures, method diagrams, equations, experiments and reproduction guides. Save canonical tags and keywords for every paper; build a searchable, filterable reading library with JSON/CSV export. Use when the user asks to read/解读/整理 papers or maintain this paper-reading workflow.
 ---
 
 # Paper Reading
@@ -20,16 +20,23 @@ The report must let the reader **grasp the whole paper by reading it alone, smoo
 ## Configured defaults (this install)
 
 - **Charts**: combine extracted original figures with redrawn code charts. Extract key original figures from the PDF where feasible; redraw lineage/timeline/comparison/perf curves as Mermaid / inline SVG.
-- **Resource search**: search broadly (GitHub, HuggingFace, project page, datasets, blogs) and aggregate links into the metadata bar + reproduction guide. **Never clone, run, or execute code** — the reproduction guide is *organized reference* (commands quoted from the README/docs), not something you test by running. The only local commands allowed are the bundled figure extractor (`scripts/extract_figures.py`) and, as a fallback, `pdftoppm` for whole-page renders.
-- **Output layout**: per-topic folder `./<topic>/` in the current working directory.
+- **Resource search**: search broadly (GitHub, HuggingFace, project page, datasets, blogs) and aggregate links into the metadata bar + reproduction guide. **Do not clone or execute the paper's research code** for a reading-only request; quote reproduction commands and state they were not executed. Local report generation, image extraction/inspection, `scripts/build_library.py`, and HTML/browser validation are allowed. Maintaining this skill's own code includes running its tests.
+- **Visual quality**: follow `reference/visual-report.md`. Plan illustrations before drafting: a core figure, method data flow, concrete example, and quantitative or qualitative evidence where available. Every visual teaches a point and links to its source. Do not fill space with invented scores or redundant images.
+- **Archiving**: every paper MUST have `metadata/<slug>.json` with 3–8 canonical `tags` and 3–8 natural-language `keywords`. Follow `reference/metadata.md` and reuse `reference/taxonomy.json` before adding new tags. Write the sidecar on disk; returning tags in a chat message is insufficient.
+- **Output layout**: use the user's selected library/topic directory outside the skill checkout and dotfiles. Otherwise create `./<topic>/` under the user's project/workspace, never under the skill's install path. Reuse the selected library for subsequent readings.
 
 ## Output structure
 
 ```
 ./<topic>/                          # topic = short english slug, ask user if ambiguous
 ├── index.html                      # navigation index — links every report + comparison
+├── library.json                    # library title + description
+├── catalog.json / catalog.csv      # generated aggregate, suitable for archiving
+├── metadata/<paper-slug>.json      # durable, per-paper source of truth (tags + keywords)
 ├── assets/
 │   ├── style.css                   # shared styling (copied from skill templates)
+│   ├── site.js                     # search/filter/export, reader tools, image zoom
+│   ├── vendor/                     # local MathJax + Mermaid, including fonts
 │   └── <paper-slug>/               # extracted figures per paper
 ├── reports/
 │   └── <paper-slug>.html           # one self-contained report per paper
@@ -50,7 +57,7 @@ The work parallelizes across papers AND, for a single paper, across **specialist
 | 2–4 papers | **Fan-out** | One subagent **per paper** via the `Agent` tool, all launched in a single message so they run concurrently. |
 | ≥5 papers, OR user asks for "集群 / cluster / 加速 / thorough / 全面 / ultracode" | **Agent cluster** | Orchestrate with the `Workflow` tool — pipeline each paper through sweep→read→report, optionally add an adversarial fact-check stage, then synthesize. |
 
-Invoking this skill **is** the user's opt-in to multi-agent orchestration — the user explicitly requested that runs use multiple agents / an agent cluster. So launch subagents (and the `Workflow` tool when in Cluster mode) without asking again.
+These modes are the skill's delegation guidance; obey the host's tool availability, concurrency limits and higher-priority delegation rules. Do not claim the user explicitly requested a cluster merely because the skill was selected. Without Agent/Workflow tools, perform the same lenses sequentially and retain the verification steps.
 
 ### Single-paper deep pipeline (default for 1 paper)
 
@@ -65,7 +72,7 @@ The goal: help the reader understand the gist fast, correctly, and get hands-on 
    - `walkthrough` — run one tiny concrete input end-to-end through the method with real intermediate values.
    - `experiments` — result tables + redrawn charts + a `.keynum-row` of the 1-3 headline numbers; say what to look at.
    - `resources+repro` — sweep GitHub/HF/datasets, read repo README + issues, **organize** the setup/train/inference commands as a copy-pasteable Quick Start (quote them from the README, do **not** run or clone).
-   - `figures` — extract key figures with the bundled `scripts/extract_figures.py` (caption-anchored, gets exact figure boundaries — NOT pdfimages/pdftoppm), **view every extracted PNG**, then select + write 中文 captions that *interpret* the figure.
+   - `figures` — extract key figures with `scripts/extract_figures.py` (caption-anchored heuristic; verify boundaries), **view every extracted PNG**, cross-check caption/page anchors, then select + write 中文 captions that *interpret* the figure.
    - `faq+limits+glossary` — the 2-4 questions a reader naturally hits, an honest局限与讨论, and a术语表.
 
    Each returns its section's HTML fragment (or structured content) — not a whole file.
@@ -75,15 +82,15 @@ The goal: help the reader understand the gist fast, correctly, and get hands-on 
 
 **Orchestrator responsibilities** (you, the main agent — always, never delegated):
 - Phase 0 (scope, slugs, topic name) — must finish *before* any fan-out so every subagent knows its `<paper-slug>` and the shared `<topic>` dir.
-- Create the directory skeleton and copy `templates/style.css` → `<topic>/assets/style.css` **once, up front**, so subagents only write their own files (no races).
+- Create the directory skeleton including `metadata/`; copy `style.css`, `site.js` and `vendor/` **once, up front**, so subagents only write their own files (no races).
 - Synthesis, applying verify-fixes and pedagogy-fixes (single-paper mode).
 - After all per-paper subagents return (multi-paper modes): build the **comparison page** (Phase 4) and **index** (Phase 5) from their returned metadata — synthesis needs the global view, so it is never delegated to a per-paper agent.
 
 **Per-paper subagent contract** (Fan-out & Cluster modes) — give each subagent:
 - Its paper source, assigned `<paper-slug>`, the absolute `<topic>` dir, and paths to `templates/report.html` + `templates/style.css`.
-- The hard rules (中文 prose, English filenames, sticky metadata bar, MathJax equations, combine extracted+redrawn figures) **and the self-contained principle**: intuition before math, a notation table, a concrete walkthrough, smooth bridges, FAQ + limits + glossary, heavy detail in `dig` blocks. (See `reference/workflow.md` block guide.)
-- Instruction to do Phase 1–3 for *its* paper only: write `reports/<paper-slug>.html` and figures under `assets/<paper-slug>/`.
-- Instruction to **return a structured metadata record** (not prose) so you can build the comparison + index without re-reading the papers. Required fields: `slug, title, authors, venue_year, one_line_summary_zh, domain_tags, key_contribution_zh, datasets, key_metrics, links{arxiv,code,checkpoints,project,dataset}, relation_hints` (how it relates to the other papers in the batch).
+- The hard rules (中文 prose, English filenames, compact sticky toolbar, MathJax equations, combine extracted+redrawn figures, persistent tags/keywords) **and the self-contained principle**: intuition before math, a notation table, a concrete walkthrough, smooth bridges, FAQ + limits + glossary, heavy detail in `dig` blocks. (See `reference/workflow.md` block guide.)
+- Instruction to do Phase 1–3 for *its* paper only: write `reports/<paper-slug>.html`, `metadata/<paper-slug>.json`, and figures under `assets/<paper-slug>/`.
+- **Persist AND return a structured metadata record** using `reference/metadata.md`: `schema_version, slug, title, authors[], year, venue, summary_zh, tags[], keywords[], read_at, cover, links`. Include `key_contribution_zh, datasets, key_metrics, relation_hints` when relevant. Embed matching JSON in the report's `#paper-metadata` block. The orchestrator builds the index from ALL on-disk sidecars, including previous runs.
 
 Subagents write disjoint files (`reports/<slug>.html`, `assets/<slug>/…`), so no worktree isolation is needed. See `reference/orchestration.md` for the ready-to-run `Workflow` script and `Agent`-tool fan-out pattern.
 
@@ -97,6 +104,7 @@ Use TaskCreate to track progress when handling multiple papers. Run the phases b
    - For arXiv/URL/title: `WebSearch` / `WebFetch` to locate the paper, abstract, and PDF.
 2. Decide the `<topic>` slug. If multiple papers and the topic is unclear, ask the user once for a short english topic name.
 3. Assign each paper a kebab-case `<paper-slug>` (usually first-author-year-keyword or the common short name, e.g. `vaswani-2017-transformer`).
+4. Read existing `metadata/*.json` tags (or `catalog.json`) and `reference/taxonomy.json`. Reuse established tags. Make a visual plan with the questions each figure must answer; verify what evidence the paper actually provides.
 
 ### Phase 1 — Resource sweep (per paper)
 Search broadly and collect into a metadata record. Use `WebSearch` + `WebFetch`:
@@ -116,7 +124,7 @@ Read the full paper. Extract and understand:
 - **Experiments**: setup (datasets, baselines, metrics, compute), key result tables, ablations. Reproduce the **key result tables** as HTML tables and **redraw key trends** as charts.
 - **Figures**: extract the paper's key figures (architecture diagram, main results) into `assets/<paper-slug>/` and embed; redraw conceptual/lineage/comparison figures as code charts.
 
-To extract figures from a PDF, **use the bundled caption-anchored extractor** — it locates each "Figure N" caption and crops the exact figure region (clustering the graphics above the caption within its column), which gets the boundaries right where `pdfimages` (fragments) and `pdftoppm` (whole-page, caption bleed) get them wrong:
+To extract figures from a PDF, **use the bundled caption-anchored extractor** — it locates each "Figure N" caption and estimates the figure region. It avoids many fragment/whole-page problems, but crops still need verification against caption/page anchors; do not assume exact boundaries merely because extraction succeeded:
 
 ```bash
 python3 ~/.claude/skills/paper-reading/scripts/extract_figures.py "paper.pdf" assets/<slug> --dpi 200
@@ -126,7 +134,7 @@ It writes `fig<N>_p<page>.png` + a `fig<N>_p<page>.txt` caption sidecar for each
 
 ### Phase 3 — Generate per-paper report
 Use `templates/report.html` as the structure. One self-contained HTML file per paper at `reports/<paper-slug>.html`. The guiding test: **a reader should follow the whole main line without opening the PDF**. Must contain, top to bottom:
-1. **Metadata bar** (sticky, at the very top) — title, authors, affiliation, venue/year, and clickable buttons for: arXiv/PDF, code repo, checkpoints, project page, dataset. (Requirement #4.)
+1. **Reader toolbar + metadata header** — compact sticky toolbar, scrollable title/authors/venue, clickable tags and resource buttons. Keep the toolbar short on phones; the full metadata header must not cover the text while scrolling.
 2. **5 分钟速读** — 一句话 / 痛点 / 做法 / 效果 / 价值 + a `.keynum-row` of headline numbers + 核心一张图.
 3. **TL;DR** — 3-5 句中文速览。
 4. **问题与动机** — with a生活化 `.intuition` analogy and a concretely-named gap.
@@ -144,6 +152,8 @@ Use `templates/report.html` as the structure. One self-contained HTML file per p
 
 Keep the **main line smooth**: intuition before math, heavy detail folded into `dig` blocks, `.bridge` sentences between sections. See `reference/workflow.md` for the comprehension-aid block guide.
 
+Before leaving Phase 3, save `metadata/<slug>.json`; include canonical tags, searchable Chinese/English keywords, the actual read date, and a verified relative cover path (or null). Put matching metadata into the report and show tag links back to `../index.html?tag=<tag>`. No quantitative experiments? Replace the score chart with an evidence/limitations table and qualitative examples; do not invent a benchmark.
+
 ### Phase 4 — Comparison page (only if ≥2 related papers)
 If two or more papers share a domain or logical relationship, generate `comparisons/<comparison-slug>.html` from `templates/comparison.html`:
 - 讲解它们之间的关系：演进 / 互补 / 竞争。
@@ -152,22 +162,27 @@ If two or more papers share a domain or logical relationship, generate `comparis
 - 中文 narrative on the development logic与取舍。
 
 ### Phase 5 — Index
-Generate/update `index.html` from `templates/index.html`:
-- Card grid linking each paper report and any comparison page.
-- Each card shows title, one-line中文 summary, venue/year, and quick links.
-- Keep it pure navigation — separate from reports (requirement #6).
+Generate the index and portable catalog from all sidecars, using the bundled builder:
+
+```bash
+python3 ~/.claude/skills/paper-reading/scripts/build_library.py <topic> --title "主题名称"
+python3 ~/.claude/skills/paper-reading/scripts/build_library.py <topic> --check
+```
+
+The builder copies shared CSS/JS/vendor files, renders static cards and comparison links, embeds catalog JSON (no browser fetch), and writes `catalog.json` / UTF-8 CSV. It rejects missing metadata and broken local resources. Repeated builds preserve reports/metadata and back up changed generated files. For a legacy custom index, first inspect its reading routes/comparison links and prepare a sample; `--replace-index` explicitly backs up and replaces that index. Do not silently discard custom navigation.
+
+The index supports multi-word search, tag intersection, recent-read/year/title ordering, grid/list view, browser-local favorites and filtered exports. Keep the index as navigation; the full report remains a separate page.
 
 ### Phase 6 — Finish
-- Copy `templates/style.css` to `<topic>/assets/style.css` (all HTML links to `../assets/style.css` or `assets/style.css`).
-- Copy `templates/vendor/` to `<topic>/assets/vendor/` (local MathJax + Mermaid; see HTML rules).
-- Tell the user the output path and which file to open first (the index).
-- All HTML must be self-contained enough to open via `file://` (local vendor JS, relative path for style.css).
+- Run the builder and `--check`; inspect the index and at least one report in a browser at desktop and mobile widths. Check image zoom, tags, a zero-result search, formulas/diagrams and relative assets. Report actual validation, not an assumed pass.
+- Report the absolute index path and the configured web-view URL, plus the new paper's tags. All pages must work via `file://` with local assets; no server startup is needed.
 
 ## HTML rules
 
 - **Light mode only.** All pages use the light palette in `style.css`; never introduce dark backgrounds. Initialize Mermaid with `theme: 'neutral'` (light) — not `'dark'`.
 - Load MathJax and Mermaid from the local vendor copy shipped with this skill: copy `templates/vendor/` to `<topic>/assets/vendor/`, then reference `../assets/vendor/mathjax/tex-mml-chtml.js` and `../assets/vendor/mermaid.min.js`. **Never use cdn.jsdelivr.net** — it is unusably slow from mainland-China networks, and a synchronous CDN `<script>` in `<head>` blocks page render entirely (white screen).
-- Use the shared `style.css`. Keep reports readable: max-width content column, clear section headers, and the `.toc-float` sidebar (auto-hidden on narrow screens) for navigation.
-- Every report/comparison page starts its `.meta-bar` with `<a class="back-to-index" href="../index.html">← 返回索引</a>` so readers can always get back to the index (templates already include it).
+- Use shared `style.css` + deferred `site.js`. The reader has scroll-aware TOC, mobile contents, font controls, focus reading, code copy, image dialog and print styles. The index never needs MathJax/Mermaid.
+- Every report/comparison has a sticky `.reader-topbar` with a back-to-index link; the full `.meta-bar` scrolls normally. Keep `.mobile-toc` available on small screens.
+- Keep HTML readable without JS. Defer Mermaid and initialize it in `site.js`; use local MathJax. Do not wrap an entire card in a link if it contains tag/favorite buttons. Missing resources use text labels or disabled buttons without fake `href` values. External new-tab links use `rel="noopener"`.
 - Embed extracted figures with `<figure><img><figcaption>` and a 中文 caption explaining the figure.
 - See `reference/workflow.md` for detailed per-section guidance, `reference/orchestration.md` for multi-agent fan-out / cluster patterns, and `templates/` for the HTML scaffolds.

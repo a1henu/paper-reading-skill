@@ -2,6 +2,9 @@
 
 Detailed guidance to keep report quality high. SKILL.md has the phase overview; this is the depth.
 
+For illustration planning, source labels and responsive interaction, also read
+`visual-report.md`. For durable tags and the catalog contract, read `metadata.md`.
+
 ## North star: the report must be self-contained
 
 The reader should grasp the **whole paper by reading the report alone, smoothly, top to bottom** — opening the original PDF *only* when they choose to dig deeper on one point. Optimize for that. A report that forces the reader back to the paper to follow the main line has failed, even if it is "accurate". Concretely:
@@ -53,7 +56,7 @@ neighbouring figures bleed into the crop. Both produce the wrong boundaries.
 
 Instead run the caption-anchored extractor shipped with this skill. It finds
 each "Figure N" caption, clusters the graphics directly above it within that
-column, and crops the exact figure region:
+column, and estimates the figure region (verify the crop; it is a heuristic):
 
 ```bash
 python3 ~/.claude/skills/paper-reading/scripts/extract_figures.py \
@@ -143,8 +146,8 @@ Populate `disabled` class on metadata-bar links that genuinely don't exist — d
 
 ## Multi-paper handling
 
-- Pick the execution mode by paper count (see SKILL.md table): 1 → inline, 2–4 → fan-out with the `Agent` tool, ≥5 or "集群/cluster/thorough" → agent cluster with the `Workflow` tool. Full patterns and ready-to-run script in `reference/orchestration.md`.
-- Orchestrator does Phase 0 + dir skeleton + `style.css` copy *before* fan-out; each subagent owns one paper (Phase 1–3) and returns a structured metadata record; orchestrator builds comparison + index from those records.
+- Pick the execution mode from SKILL.md: one paper uses the specialist pipeline unless quick reading is requested. Respect available tools and host concurrency limits; run sequentially when delegation is unavailable.
+- Orchestrator prepares directories and shared CSS/JS/vendor *before* fan-out. Each paper owns its HTML, figures and `metadata/<slug>.json` (see `metadata.md`); orchestrator builds comparison pages and runs `build_library.py` against all on-disk metadata.
 - Subagents write disjoint files (`reports/<slug>.html`, `assets/<slug>/`), so no worktree isolation is needed.
 - Build a TaskCreate list to track progress: one task per paper, plus comparison + index.
 - Decide relatedness from the returned `relation_hints`: same task/domain, citing each other, or sharing a method family → make a comparison page (split into multiple if the batch forms separate clusters). Unrelated one-offs → skip comparison, just index them.
@@ -153,8 +156,9 @@ Populate `disabled` class on metadata-bar links that genuinely don't exist — d
 ## Self-check before finishing
 
 - index.html links resolve to every report + comparison.
-- Every report has the sticky metadata bar at the very top with working links.
+- Every report has a compact sticky reader toolbar, a scrollable metadata header, canonical tag links and matching sidecar/embedded metadata.
 - All prose中文; equations shown as LaTeX; figures have中文 captions.
 - File/dir names all English kebab-case.
 - **Self-contained check** — can a reader follow the whole main line without the PDF? Every hard equation has a preceding `.intuition`; every symbol is in the `.notation` table; there's a `#bigpicture` before details, a `#walkthrough` with real values, a `#faq`, and a `#glossary`. Heavy detail is in `dig` blocks, not the main line.
-- Tell the user: output path + "先打开 `<topic>/index.html`".
+- Run `build_library.py <topic> --check`, then check desktop/mobile browser behavior (see `visual-report.md`).
+- Tell the user the absolute index path, configured view URL, and assigned tags.

@@ -10,14 +10,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{COMPARISON_TITLE}} — 对比解读</title>
 <link rel="stylesheet" href="../assets/style.css">
-<script src="../assets/vendor/mermaid.min.js"></script>
-<script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+<script defer src="../assets/vendor/mermaid.min.js"></script>
+<script defer src="../assets/site.js"></script>
 <script>
   MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
 </script>
 <script async src="../assets/vendor/mathjax/tex-mml-chtml.js"></script>
 </head>
-<body>
+<body class="report-page">
+<a class="skip-link" href="#comparison-main">跳到正文</a>
+<div class="reading-progress" aria-hidden="true"></div>
+<div class="reader-topbar"><a class="back-to-index" href="../index.html">← 论文阅读室</a>
+  <div class="reader-tools js-only"><span class="progress-label">0%</span>
+    <button type="button" data-action="font-down" aria-label="减小正文字号">A−</button>
+    <button type="button" data-action="font-up" aria-label="增大正文字号">A＋</button>
+    <button type="button" data-action="print">打印 / PDF</button></div>
+</div>
 
 <header class="meta-bar">
   <a class="back-to-index" href="../index.html">← 返回索引</a>
@@ -30,7 +38,7 @@
   </nav>
 </header>
 
-<main class="wrap">
+<main class="wrap" id="comparison-main">
 
   <section>
     <h2>1. 它们是什么关系</h2>

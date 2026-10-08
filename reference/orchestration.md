@@ -9,10 +9,12 @@ The unit of parallelism is **one paper = one agent** doing Phase 1–3 (resource
 ## Setup the orchestrator does BEFORE any fan-out
 
 ```bash
-mkdir -p <topic>/assets <topic>/reports <topic>/comparisons
+mkdir -p <topic>/assets <topic>/reports <topic>/comparisons <topic>/metadata
 cp ~/.claude/skills/paper-reading/templates/style.css <topic>/assets/style.css
+cp ~/.claude/skills/paper-reading/templates/site.js <topic>/assets/site.js
+cp -r ~/.claude/skills/paper-reading/templates/vendor <topic>/assets/vendor
 ```
-Then decide slugs for every paper. Subagents only ever write `reports/<slug>.html` and `assets/<slug>/…`, so their writes never collide — no worktree isolation needed.
+Then decide slugs for every paper. Subagents only ever write `reports/<slug>.html`, `metadata/<slug>.json` and `assets/<slug>/…`, so their writes never collide — no worktree isolation needed.
 
 ---
 
@@ -37,16 +39,19 @@ Do Phase 1–3 for THIS paper only:
    project page, datasets, venue/year, authors, affiliations. Record every URL.
 2. Deep read the full paper (Read tool with pages= for PDFs; WebFetch for arxiv).
 3. Write <topic>/reports/<paper-slug>.html from the report template. Extract key figures
-   with `pdfimages`/`pdftoppm` into <topic>/assets/<paper-slug>/; redraw lineage/comparison
-   as Mermaid. Sticky metadata bar at top with all links. Prose 中文, equations in MathJax LaTeX,
+   with the bundled `scripts/extract_figures.py` into <topic>/assets/<paper-slug>/; redraw lineage/comparison
+   as Mermaid. Compact sticky reader toolbar, scrollable metadata header and tag links. Prose 中文, equations in MathJax LaTeX,
    filenames English.
 
 HARD RULES: report prose 中文 (terms English OK); every key equation shown as LaTeX then
 explained symbol-by-symbol; figures get 中文 <figcaption>; mark dead metadata links class="disabled".
 
+Persist metadata/<paper-slug>.json using reference/metadata.md and mirror it in the HTML.
+Read reference/visual-report.md; figures must teach a point and cite their source.
 RETURN (this is your final output — raw JSON, not prose), so the orchestrator can build the
 comparison + index without re-reading:
-{slug, title, authors, venue_year, one_line_summary_zh, domain_tags:[...],
+{schema_version:1, slug, title, authors:[...], year, venue, summary_zh,
+ tags:[...], keywords:[...], read_at, cover,
  key_contribution_zh, datasets:[...], key_metrics:{...},
  links:{arxiv,code,checkpoints,project,dataset},
  relation_hints:"how this relates to the other papers in the batch"}
@@ -58,7 +63,7 @@ After all agents return: you (orchestrator) build the comparison page (if relate
 
 ## Mode B — Agent cluster (≥5 papers, or "集群/cluster/thorough/全面/ultracode") via the Workflow tool
 
-Pipeline each paper through stages so a fast paper isn't blocked by a slow one. Optionally add an adversarial fact-check stage to raise accuracy. Invoking this skill is the opt-in, so calling `Workflow` here is authorized.
+Pipeline each paper through stages so a fast paper isn't blocked by a slow one. Optionally add an adversarial fact-check stage to raise accuracy. Follow SKILL.md and the host's delegation permissions/tool availability; use sequential stages if Workflow is unavailable.
 
 ```js
 export const meta = {
@@ -75,11 +80,14 @@ const { topic, templatesDir, papers } = args
 
 const META_SCHEMA = {
   type: 'object',
-  required: ['slug','title','venue_year','one_line_summary_zh','links'],
+  required: ['schema_version','slug','title','authors','year','venue','summary_zh','tags','keywords','read_at','cover','links'],
   properties: {
-    slug: {type:'string'}, title: {type:'string'}, authors: {type:'string'},
-    venue_year: {type:'string'}, one_line_summary_zh: {type:'string'},
-    domain_tags: {type:'array', items:{type:'string'}},
+    schema_version: {type:'integer', enum:[1]},
+    slug: {type:'string'}, title: {type:'string'}, authors: {type:'array', items:{type:'string'}},
+    year: {type:['integer','null']}, venue: {type:'string'}, summary_zh: {type:'string'},
+    tags: {type:'array', minItems:3, maxItems:8, items:{type:'string'}},
+    keywords: {type:'array', minItems:3, maxItems:8, items:{type:'string'}},
+    read_at: {type:['string','null']}, cover: {type:['string','null']},
     key_contribution_zh: {type:'string'},
     datasets: {type:'array', items:{type:'string'}},
     key_metrics: {type:'object'},
@@ -94,10 +102,10 @@ const records = await pipeline(
   (p) => agent(
     `Write the paper-reading report for "${p.source}" (slug ${p.slug}) into ${topic}/reports/${p.slug}.html.
      Templates at ${templatesDir}. style.css already at ${topic}/assets/style.css (link ../assets/style.css).
-     Do resource sweep + deep read + figure extraction (pdfimages/pdftoppm into ${topic}/assets/${p.slug}/).
-     Rules: 中文 prose, English filenames, sticky metadata bar with all links, equations as MathJax LaTeX,
+     Do resource sweep + deep read + figure extraction (scripts/extract_figures.py into ${topic}/assets/${p.slug}/).
+     Rules: 中文 prose, English filenames, compact reader toolbar, scrollable metadata header with resource/tag links, equations as MathJax LaTeX,
      figures with 中文 captions. Read ~/.claude/skills/paper-reading/reference/workflow.md for the quality bar.
-     Return the structured metadata record.`,
+     Persist metadata/${p.slug}.json following reference/metadata.md; mirror it in the report and return the record.`,
     { label: `report:${p.slug}`, phase: 'Report', schema: META_SCHEMA }
   ),
   // Stage 2: adversarial fact-check — fixes inline, returns the (possibly corrected) record
@@ -113,7 +121,7 @@ const records = await pipeline(
 return { records: records.filter(Boolean) }
 ```
 
-For very large or low-importance batches, drop Stage 2 to save tokens. For a "be exhaustive" request, add a third stage: a completeness critic per paper ("what did the report miss — an ablation, a limitation, a key baseline?") and loop the report agent on its findings.
+For large batches, reduce secondary background depth before trimming verification of key numbers/claims/links/tags. For a thorough request, add a completeness critic and loop the report writer on its findings.
 
 After the workflow returns, the orchestrator reads `records` and builds the comparison + index — same as Mode A.
 
@@ -134,14 +142,16 @@ For ONE paper, parallelize across **specialist lenses** instead of across papers
 | `method` | equation-by-equation walkthrough (the careful one) | reading + MathJax |
 | `experiments` | result tables + redrawn charts | reading + tables |
 | `resources+repro` | sweep GitHub/HF/datasets, read README+issues, organize setup/train/inference commands into a copy-pasteable Quick Start (quote from README — never run/clone) | web |
-| `figures` | extract key figures (pdfimages/pdftoppm) + 中文 captions | bash |
+| `figures` | extract key figures (scripts/extract_figures.py) + 中文 captions | bash |
 
 **Step 3 — Synthesis (you).** Assemble fragments into `reports/<slug>.html` from the template. Write TL;DR + 「5 分钟速读」 + 核心一张图 + per-section 要点. Smooth transitions, kill duplication.
 
-**Step 4 — Adversarial verify.** Launch 3 skeptics in parallel, distinct lenses, each fixes inline:
+**Step 4 — Adversarial verify.** Launch 3 skeptics in parallel, distinct lenses, each returns proposed corrections with source evidence (read-only; no concurrent edits to one HTML):
 - math-lens: every equation & symbol explanation correct vs the paper.
 - numbers-lens: every result number matches the paper's tables; no invented SOTA.
 - links-lens: every metadata/repro link resolves to the right artifact.
+
+Apply all skeptic corrections sequentially in the orchestrator before the next step.
 
 **Step 5 — Pedagogy / usability critic (one agent).** Read the final HTML as a newcomer: flag comprehension gaps, weak intuitions, missing "why"; check the Quick Start is complete and copy-pasteable (reads right against the README — not run/executed). Apply fixes, or loop the relevant specialist once.
 
@@ -169,7 +179,7 @@ const LENSES = [
   ['method',      'equation-by-equation walkthrough; LaTeX then symbol-by-symbol 中文'],
   ['experiments', 'key result tables as HTML + redrawn trend charts'],
   ['repro',       'sweep GitHub/HF/datasets, read README+issues, organize setup/train/inference commands into a copy-pasteable Quick Start + resource links (quote from README, never run/clone)'],
-  ['figures',     'extract key figures via pdfimages/pdftoppm into '+topic+'/assets/'+slug+'/, 中文 captions'],
+  ['figures',     'extract key figures via scripts/extract_figures.py into '+topic+'/assets/'+slug+'/, 中文 captions'],
 ]
 
 // Step 2: lenses in parallel (barrier — synthesis needs all fragments)
@@ -182,17 +192,18 @@ const frags = await parallel(LENSES.map(([key, job]) => () => agent(
 // ... you (orchestrator) synthesize frags into reports/<slug>.html here ...
 // then Step 4: verify
 const VLENS = ['math (equations & symbols vs paper)','numbers (results match paper tables, no invented SOTA)','links (every link resolves to the right artifact)']
-await parallel(VLENS.map(v => () => agent(
-  `Adversarially verify ${topic}/reports/${slug}.html against "${source}", lens: ${v}. FIX errors inline in the file.`,
+const findings = await parallel(VLENS.map(v => () => agent(
+  `Adversarially verify ${topic}/reports/${slug}.html against "${source}", lens: ${v}. Return proposed corrections with source evidence; do NOT edit the shared file.`,
   { label: `verify`, phase: 'Verify' })))
 
+// Orchestrator applies the verifier findings sequentially; do not lose returned findings.
 // Step 5: pedagogy critic
 await agent(
   `Read ${topic}/reports/${slug}.html as a newcomer. Flag comprehension gaps, weak intuitions, missing "why";
    check the Quick Start is complete and copy-pasteable against the README (do NOT run anything). FIX the HTML directly to improve clarity and skimmability.`,
   { label: 'pedagogy', phase: 'Pedagogy' })
 
-return { frags: frags.filter(Boolean) }
+return { frags: frags.filter(Boolean), findings }
 ```
 
 Note: `parallel()` for lenses is a deliberate barrier — synthesis genuinely needs all fragments before assembling. The fragment agents return HTML the orchestrator stitches; figure files are written to disk directly by the `figures`/`experiments` lenses.
@@ -201,7 +212,22 @@ Note: `parallel()` for lenses is a deliberate barrier — synthesis genuinely ne
 
 ## Scaling knobs
 
-- **Concurrency** is capped at ~`min(16, cores-2)` per workflow; passing 30 papers is fine, they queue.
+- **Concurrency** must respect the host's available agent slots; queue excess lenses/papers.
 - **Relatedness for comparison**: build a comparison page only when papers share a domain / cite each other / share a method family. Unrelated batch → skip comparison, just index. Use the `relation_hints` field to decide, and group into multiple comparison pages if the batch splits into clusters.
 - **Don't delegate synthesis**: comparison + index always done by the orchestrator from returned metadata, never by a per-paper agent.
-- **Token budget**: if a `budget` directive is set, scale stages — drop Verify first, then trim figure extraction depth.
+- **Token budget**: reduce secondary background/figure depth first; retain checks for key claims, numbers, links and tags.
+
+## Finish and archive (all modes)
+
+Persist one `metadata/<slug>.json` per paper (canonical tags + keywords), and keep its
+embedded report metadata in sync. After all writers finish, the orchestrator runs:
+
+```bash
+python3 ~/.claude/skills/paper-reading/scripts/build_library.py <topic>
+python3 ~/.claude/skills/paper-reading/scripts/build_library.py <topic> --check
+```
+
+Read `reference/visual-report.md` for the illustration/provenance checklist and
+browser acceptance steps. Index and catalog derive from ALL sidecars, not just
+records returned by the current batch. Never replace an old catalog with only the
+new batch, and never let multiple skeptics write the same HTML concurrently.

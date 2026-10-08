@@ -1,2 +1,7 @@
 __pycache__/
 *.pyc
+*.bak.*
+.pytest_cache/
+tests/artifacts/
+/reading-library/
+/examples/reading-library/

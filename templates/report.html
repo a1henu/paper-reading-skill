@@ -28,20 +28,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{PAPER_SHORT_NAME}} — 解读</title>
 <link rel="stylesheet" href="../assets/style.css">
+<meta name="keywords" content="{{KEYWORDS_COMMA_SEPARATED}}">
 <script>
   MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']], displayMath: [['$$','$$'],['\\[','\\]']] } };
 </script>
 <script async src="../assets/vendor/mathjax/tex-mml-chtml.js"></script>
-<script src="../assets/vendor/mermaid.min.js"></script>
-<script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+<script defer src="../assets/vendor/mermaid.min.js"></script>
+<script defer src="../assets/site.js"></script>
 </head>
-<body>
+<body class="report-page">
+<a class="skip-link" href="#report-main">跳到正文</a>
+<div class="reading-progress" aria-hidden="true"></div>
+<div class="reader-topbar">
+  <a class="back-to-index" href="../index.html">← 论文阅读室</a>
+  <div class="reader-tools js-only" aria-label="阅读工具">
+    <span class="progress-label" aria-label="阅读进度">0%</span>
+    <button type="button" data-action="font-down" aria-label="减小正文字号">A−</button>
+    <button type="button" data-action="font-up" aria-label="增大正文字号">A＋</button>
+    <button type="button" data-action="focus" aria-pressed="false">专注阅读</button>
+    <button type="button" data-action="print">打印 / PDF</button>
+  </div>
+</div>
 
 <!-- ============ METADATA BAR (requirement #4) ============ -->
 <header class="meta-bar">
-  <a class="back-to-index" href="../index.html">← 返回索引</a>
+  <span class="eyebrow">PAPER NOTES · {{VENUE_YEAR}}</span>
   <h1>{{PAPER_FULL_TITLE}}</h1>
+  <p class="report-lede">{{ONE_SENTENCE_CORE_IDEA_ZH}}</p>
   <div class="authors">{{AUTHORS}} · {{AFFILIATION}} · {{VENUE_YEAR}}</div>
+  <div class="report-tags" aria-label="文章标签">{{TAG_LINKS_HTML}}</div>
   <nav class="meta-links">
     <a href="{{ARXIV_URL}}" target="_blank">📄 arXiv / PDF</a>
     <a href="{{CODE_REPO_URL}}" target="_blank">💻 Code</a>
@@ -73,10 +88,24 @@
   </ol>
 </nav>
 
-<main class="wrap">
+<details class="mobile-toc js-only"><summary>本篇目录 · 跳到感兴趣的章节</summary><nav aria-label="移动端章节导航"></nav></details>
+
+<main class="wrap" id="report-main">
 
   <!-- ============ 5-MINUTE SPEED READ (fast comprehension) ============ -->
   <section id="speedread">
+    <!-- 核心一张图：整篇文章最该先看的那张图（原图抽取或重绘） -->
+    <figure class="visual-panel">
+      <div class="visual-heading">先看懂这一张图 <span class="visual-kind">论文原图</span></div>
+      <img src="../assets/{{PAPER_SLUG}}/key-figure.png" alt="{{描述输入、关键模块与输出；不要只写 key figure}}" loading="eager" decoding="async">
+      <figcaption>核心图：{{为什么这张图最重要，一眼看懂全文}}
+        <!-- 对抽取的原图：附上论文原 caption（extract_figures.py 的 .txt/manifest），默认折叠 -->
+        <details class="orig-cap"><summary>📄 原文 caption</summary><p>{{ORIGINAL_ENGLISH_CAPTION}}</p></details>
+      </figcaption>
+      <div class="figure-guide"><strong>怎么看：</strong>{{先看哪个区域 → 顺着哪条路径 → 最后比较什么；解释图的含义而不是复述图名}}</div>
+      <div class="figure-source">来源：<a href="{{PAPER_PDF_URL}}#page={{PDF_PAGE}}" target="_blank" rel="noopener">原文 Figure {{FIGURE_NUMBER}} · PDF 第 {{PDF_PAGE}} 页</a></div>
+    </figure>
+
     <div class="callout good">
       <div class="label">⏱️ 如果你只有 5 分钟</div>
       <ul>
@@ -95,14 +124,7 @@
       <div class="keynum"><div class="n">{{Z}}</div><div class="cap">{{另一个核心指标}}</div></div>
     </div>
 
-    <!-- 核心一张图：整篇文章最该先看的那张图（原图抽取或重绘） -->
-    <figure>
-      <img src="../assets/{{PAPER_SLUG}}/key-figure.png" alt="key figure">
-      <figcaption>核心图：{{为什么这张图最重要，一眼看懂全文}}
-        <!-- 对抽取的原图：附上论文原 caption（extract_figures.py 的 .txt/manifest），默认折叠 -->
-        <details class="orig-cap"><summary>📄 原文 caption</summary><p>{{ORIGINAL_ENGLISH_CAPTION}}</p></details>
-      </figcaption>
-    </figure>
+
   </section>
 
   <section id="tldr">
@@ -241,6 +263,16 @@ flowchart TB
     </table>
     <div class="takeaway">{{从实验里读出的核心结论，而不是复述数字}}</div>
 
+    <!-- Redraw a key comparison only when the paper supplies comparable numbers.
+         Keep the source table above. Include units, metric direction, baseline,
+         evaluation setting and source table/page. Never invent numbers to fill this. -->
+    <figure class="visual-panel">
+      <div class="visual-heading">关键结果，一眼看懂 <span class="visual-kind">据原表重绘</span></div>
+      {{ACCESSIBLE_INLINE_SVG_CHART_WITH_TITLE_DESC_AND_UNITS}}
+      <figcaption>{{看哪组对比、可支持什么结论、比较的限制}}</figcaption>
+      <div class="figure-source">来源：{{TABLE_NUMBER_AND_PAGE}} · {{METRIC_DIRECTION_UNIT_AND_SETTING}}</div>
+    </figure>
+
     <details class="dig">
       <summary>深入（可跳过）：消融实验与更多结果</summary>
       <p>{{ablation 说明了哪个组件最关键；其它次要表格}}</p>
@@ -321,5 +353,8 @@ cd repo && {{一行装环境}}
   </section>
 
 </main>
+<!-- Serialize metadata/<slug>.json with '<' escaped to '\u003c'. Keep slug/tags/
+     keywords identical to the sidecar. This is structured data, not executable JS. -->
+<script type="application/json" id="paper-metadata">{{PAPER_METADATA_JSON}}</script>
 </body>
 </html>

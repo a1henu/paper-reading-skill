@@ -1,0 +1,19 @@
+<figure class="visual-panel" data-preview-section="exp" data-visual-kind="redraw">
+  <div class="visual-heading">同一人评协议下，整体得分如何变化 <span class="visual-kind">据原报告表格重绘</span></div>
+  <svg viewBox="0 0 800 395" role="img" aria-labelledby="vision-score-title vision-score-desc" xmlns="http://www.w3.org/2000/svg">
+    <title id="vision-score-title">VisGenBench 人评 Overall 得分对比</title>
+    <desc id="vision-score-desc">零起点横轴，分数越高越好。GPT-5 为 3.19，Gemini2.5-Pro 为 3.01，Qwen3-VL-32B-Thinking 为 3.18，RL 版为 3.07，SFT 版为 3.27，VisionCreator-32B 为 3.42。数据来自本阅读笔记引用的论文 Table 3。</desc>
+    <g font-family="sans-serif">
+      <text x="206" y="22" fill="#626b63" font-size="12">Overall · 得分 ↑（人评与成功率的聚合）</text>
+      <g stroke="#e0e2d8"><path d="M205 45V330M340 45V330M475 45V330M610 45V330M745 45V330"/></g>
+      <g font-size="12" fill="#687065" text-anchor="middle"><text x="205" y="352">0</text><text x="340" y="352">1</text><text x="475" y="352">2</text><text x="610" y="352">3</text><text x="745" y="352">4</text></g>
+      <g font-size="12" fill="#3b453e" text-anchor="end"><text x="189" y="76">GPT-5</text><text x="189" y="121">Gemini2.5-Pro</text><text x="189" y="166">Qwen3-VL-32B-Thinking</text><text x="189" y="211">Qwen3-VL-32B-RL</text><text x="189" y="256">Qwen3-VL-32B-SFT</text><text x="189" y="301" font-weight="700">VisionCreator-32B</text></g>
+      <g fill="#b7c6b2"><rect x="205" y="56" width="430.65" height="29" rx="3"/><rect x="205" y="101" width="406.35" height="29" rx="3"/><rect x="205" y="146" width="429.3" height="29" rx="3"/><rect x="205" y="191" width="414.45" height="29" rx="3"/><rect x="205" y="236" width="441.45" height="29" rx="3"/></g>
+      <rect x="205" y="281" width="461.7" height="29" rx="3" fill="#326b55"/>
+      <g font-size="13" fill="#445d46"><text x="644" y="76">3.19</text><text x="620" y="121">3.01</text><text x="643" y="166">3.18</text><text x="628" y="211">3.07</text><text x="655" y="256">3.27</text><text x="675" y="301" font-weight="700">3.42</text></g>
+      <text x="205" y="382" fill="#687065" font-size="11">此图只比较同一表格的人评结果；上方 8B 自动评测使用不同协议。</text>
+    </g>
+  </svg>
+  <figcaption class="figure-guide"><strong>怎么看：</strong>先比较深绿色行和各条基线，再回看上方的人评来源表。Overall 同时包含成功率与人评因素；这一差异不等于纯审美提升，也不能与 8B 自动评测分数混用。</figcaption>
+  <div class="figure-source">数据：本笔记实验节所引用的论文 Table 3；完整六行数值保留在上方表格。此次仅据既有笔记重绘，未重新核验原论文。</div>
+</figure>

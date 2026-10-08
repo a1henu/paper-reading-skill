@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "groups": {
+    "domain": ["computer-vision", "natural-language-processing", "multimodal", "robotics", "machine-learning"],
+    "task": ["image-generation", "video-generation", "image-editing", "graphic-design", "document-understanding", "retrieval", "reasoning", "code-generation", "segmentation", "object-detection"],
+    "method": ["llm-agent", "tool-use", "planning", "reflection", "diffusion", "transformer", "reinforcement-learning", "supervised-fine-tuning", "distillation", "retrieval-augmented-generation", "contrastive-learning", "low-rank-adaptation"],
+    "artifact": ["benchmark", "dataset", "survey", "editable-design"]
+  },
+  "aliases": {
+    "cv": "computer-vision",
+    "nlp": "natural-language-processing",
+    "multi-modal": "multimodal",
+    "t2i": "image-generation",
+    "text-to-image": "image-generation",
+    "text-to-video": "video-generation",
+    "agent": "llm-agent",
+    "agents": "llm-agent",
+    "agentic": "llm-agent",
+    "rl": "reinforcement-learning",
+    "sft": "supervised-fine-tuning",
+    "rag": "retrieval-augmented-generation",
+    "lora": "low-rank-adaptation",
+    "knowledge-distillation": "distillation"
+  }
+}

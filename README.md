@@ -115,7 +115,8 @@ PAPER_READING_SITE=/path/to/reading-library python3 -m pytest tests/test_browser
 node --check templates/site.js
 ```
 
-The browser suite needs the three-paper preview and Playwright Chromium.
+The browser suite needs Playwright Chromium and a library containing the three
+example reports; the library may include any number of additional papers.
 `PAPER_READING_SITE` selects its external directory (default: `~/reading-library`).
 
 The browser suite checks search/tag intersection, sorting, favorites, exports,

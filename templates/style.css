@@ -401,7 +401,7 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 .paper-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
 .paper-card { min-width: 0; border: 1px solid var(--border); border-radius: 11px; background: white; overflow: hidden; display: flex; flex-direction: column; transition: border-color .18s, box-shadow .18s, transform .18s; }
 .paper-card:hover { border-color: #b8beb2; box-shadow: 0 8px 24px #27312909; transform: translateY(-2px); }
-.paper-cover { display: block; position: relative; height: 160px; background: #efefe7; border-bottom: 1px solid var(--border); overflow: hidden; }
+.paper-cover { display: block; position: relative; height: 160px; background: #efefe7; border-bottom: 1px solid var(--border); overflow: hidden; text-decoration: none; }
 .paper-cover img { width: 100%; height: 100%; object-fit: contain; padding: 9px; }
 .cover-placeholder { height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 25px; background: repeating-linear-gradient(0deg, transparent, transparent 27px, #d7ddcf 28px), #edf0e6; }
 .cover-placeholder b { font: 32px var(--serif); color: #617460; }
@@ -414,7 +414,7 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 .paper-card h2 { border: 0; padding: 0; margin: 8px 0; font: 600 20px/1.4 var(--serif); overflow-wrap: anywhere; }
 .paper-card h2 a { color: var(--text); text-decoration: none; }
 .paper-card h2 a:hover { color: var(--accent); }
-.paper-summary { font-size: 15px; line-height: 1.7; color: var(--text-dim); margin: 0 0 12px; }
+.paper-summary { font-size: 15px; line-height: 1.7; color: var(--text-dim); margin: 0 0 12px; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .paper-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: auto; }
 .paper-tags .tag { font-size: 12px; padding: 2px 6px; }
 .paper-footer { display: flex; justify-content: space-between; gap: 10px; padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-dim); }
@@ -452,6 +452,7 @@ a, button, input, select, summary { -webkit-tap-highlight-color: transparent; }
 .report-page table, .report-page pre, .report-page figcaption { font-size: .85em; }
 /* Long inline formulas keep their type size and scroll within the text column. */
 .report-page mjx-container:not([display="true"]) { display: inline-block; max-width: 100%; overflow-x: auto; vertical-align: middle; padding: .12em 0; }
+.report-page mjx-container[display="true"] { display: block; min-width: 0 !important; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: .25em 0; }
 .report-page .takeaway { font-size: .95em; }
 .report-page details.dig > :not(summary) { font-size: 1em; }
 .report-page details.dig > summary, .report-page .callout .label, .report-page .intuition .label, .report-page .eq-explain dt { font-size: .85em; }

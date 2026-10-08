@@ -302,7 +302,8 @@ def build(topic: Path, title: str | None, description: str | None, check: bool, 
         "TITLE": escape(config["title"]), "DESCRIPTION": escape(config["description"]),
         "COUNT": str(len(papers)), "TAG_FILTERS": tag_html,
         "CARDS": "\n".join(render_card(p) for p in papers),
-        "COMPARISONS": '<section class="comparison-links"><h2>串起来读 · 论文对比</h2>' + "".join(comparisons) + "</section>" if comparisons else "",
+        "COLLECTION_NAV": '<p><a href="#reading-collections">专题、对比与学习路径 ↗</a></p>' if comparisons else "",
+        "COMPARISONS": '<section class="comparison-links" id="reading-collections"><h2>专题、对比与学习路径</h2>' + "".join(comparisons) + "</section>" if comparisons else "",
         "CATALOG_JSON": script_json(catalog),
     }
     template = (ROOT / "templates" / "index.html").read_text()

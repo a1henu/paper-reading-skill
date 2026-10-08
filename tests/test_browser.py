@@ -1,4 +1,4 @@
-"""Browser acceptance on the isolated, real-report preview. No live web server."""
+"""Browser acceptance on an external library containing the three example reports."""
 from __future__ import annotations
 
 import json
@@ -11,6 +11,10 @@ from playwright.sync_api import sync_playwright, expect
 ROOT = Path(__file__).resolve().parents[1]
 SITE = Path(os.environ.get("PAPER_READING_SITE", "~/reading-library")).expanduser().resolve()
 ARTIFACTS = ROOT / "tests/artifacts"
+
+
+def catalog():
+    return json.loads((SITE / "catalog.json").read_text())["papers"]
 
 
 @pytest.fixture(scope="module")
@@ -30,15 +34,16 @@ def test_search_tags_sort_favorites_exports_and_views(browser):
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto((SITE / "index.html").as_uri())
-    expect(page.locator(".paper-card:visible")).to_have_count(3)
-    page.locator("#paper-search").fill("可编辑 HTML")
+    expect(page.locator(".paper-card:visible")).to_have_count(len(catalog()))
+    page.locator("#paper-search").fill("Editable Visual Design")
     expect(page.locator(".paper-card:visible")).to_have_count(1)
     page.locator("#clear-filters").click()
     page.locator('#tag-filters [data-tag="graphic-design"]').click()
     page.locator('#tag-filters [data-tag="llm-agent"]').click()
-    expect(page.locator(".paper-card:visible")).to_have_count(2)
+    matching = sum({"graphic-design", "llm-agent"} <= set(p["tags"]) for p in catalog())
+    expect(page.locator(".paper-card:visible")).to_have_count(matching)
     page.reload()
-    expect(page.locator(".paper-card:visible")).to_have_count(2)
+    expect(page.locator(".paper-card:visible")).to_have_count(matching)
     page.locator("#paper-search").fill("no-result-123")
     expect(page.locator("#empty-state")).to_be_visible()
     page.locator("#empty-reset").click()
@@ -60,14 +65,16 @@ def test_search_tags_sort_favorites_exports_and_views(browser):
     assert "UTPC" in csv and "Editable Visual Design" not in csv
     page.locator("#clear-filters").click()
     page.locator("#paper-sort").select_option("year")
-    assert page.locator(".paper-card").last.get_attribute("data-paper-slug") == "paper2poster"
+    years = {p["slug"]: p["year"] or 0 for p in catalog()}
+    ordered = page.locator(".paper-card").evaluate_all("cards => cards.map(c => c.dataset.paperSlug)")
+    assert [years[s] for s in ordered] == sorted(years.values(), reverse=True)
     page.locator('[data-view="list"]').click()
     expect(page.locator("#paper-grid")).to_have_class("paper-grid is-list")
     page.reload()
     expect(page.locator("#paper-grid")).to_have_class("paper-grid is-list")
     page.locator('[data-view="grid"]').click()
     page.locator("#clear-filters").click()
-    page.screenshot(path=str(ARTIFACTS / "library-desktop.png"), full_page=True)
+    page.screenshot(path=str(ARTIFACTS / "library-desktop.png"))
     assert not errors, errors
     context.close()
 
@@ -137,20 +144,22 @@ def test_mobile_library_no_js_and_denied_storage(browser):
     context.add_init_script("Object.defineProperty(window,'localStorage',{get(){throw new Error('denied')}})")
     page = context.new_page()
     page.goto((SITE / "index.html").as_uri())
-    expect(page.locator('.paper-card:visible')).to_have_count(3)
+    expect(page.locator('.paper-card:visible')).to_have_count(len(catalog()))
     page.locator('[data-favorite="paper2poster"]').click()
     expect(page.locator(".toast")).to_contain_text("未允许保存")
     page.locator('[data-shelf="favorites"]').click()
     expect(page.locator('.paper-card:visible')).to_have_count(1)
     page.locator("#clear-filters").click()
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1")
-    page.screenshot(path=str(ARTIFACTS / "library-mobile.png"), full_page=True)
+    page.screenshot(path=str(ARTIFACTS / "library-mobile.png"))
     context.close()
     offline = browser.new_context(java_script_enabled=False)
     page = offline.new_page()
     page.goto((SITE / "index.html").as_uri())
-    expect(page.locator('.paper-card:visible')).to_have_count(3)
+    expect(page.locator('.paper-card:visible')).to_have_count(len(catalog()))
+    slug = page.locator('.paper-card').first.get_attribute('data-paper-slug')
+    tag_count = len(next(p['tags'] for p in catalog() if p['slug'] == slug))
     page.locator('h2 a').first.click()
     expect(page.locator("main")).to_be_visible()
-    expect(page.locator('.report-tags a')).to_have_count(4)
+    expect(page.locator('.report-tags a')).to_have_count(tag_count)
     offline.close()

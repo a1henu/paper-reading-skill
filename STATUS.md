@@ -1,6 +1,8 @@
 # Paper-reading refresh — 2026-10-08
 
 Current library: `/mnt/user-ssd/baichenxu/reading-library/index.html`.
+Latest state: the user subsequently authorized the full historical archive;
+98 unique papers and the legacy topic/navigation pages are now in that library.
 The earlier sections retain their original validation commands; paths under
 `examples/reading-library` were moved outside this repository in the final step.
 
@@ -154,3 +156,45 @@ git diff --check
   all 10 VisionCreator original images, with no page or resource errors.
 - Active index: [open in browser](http://s-20260601154539-r653m-j57r1.bcecn-bj-cloudml.xiaomi.srv/view/mnt/user-ssd/baichenxu/reading-library/index.html).
 - Full migration of legacy reading sites remains outside this sample iteration.
+
+## Historical archive compatibility — 2026-10-08
+
+The subsequent user request authorized inventorying and importing all historical
+reports. The external library now holds 98 unique papers, 34 tags, 30 topic entry
+points and 47 archived Markdown notes. Original project reports remain in place;
+the migration provenance and scripts stay in the library, outside this repository.
+Workspace-root `AGENTS.md` requires future paper reports to be synchronized there.
+The earlier sample-only scope above is historical.
+
+Reusable changes in this follow-up:
+
+- Added a sidebar shortcut and heading for topic, comparison and learning routes.
+- Clamped index summaries to three lines while preserving complete card titles.
+- Kept MathJax away from Mermaid source nodes and allowed long numbered display
+  formulas to scroll inside the report column, including on phones.
+- Bundled the matching MathJax 3.2.2 boldsymbol extension for offline formulas;
+  upstream source, byte comparison and checksum are recorded beside the asset.
+- Let browser tests validate libraries larger than the three-report preview while
+  retaining the original examples for reader and interaction coverage.
+
+Validation actually run from this skill root:
+
+```bash
+python3 scripts/build_library.py /mnt/user-ssd/baichenxu/reading-library
+python3 scripts/build_library.py /mnt/user-ssd/baichenxu/reading-library --check
+PAPER_READING_SITE=/mnt/user-ssd/baichenxu/reading-library python3 -m pytest tests/test_library.py tests/test_browser.py -q
+python3 -m py_compile scripts/build_library.py tests/test_browser.py
+node --check templates/site.js
+node --check templates/vendor/mathjax/input/tex/extensions/boldsymbol.js
+git diff --check
+```
+
+- 19 tests passed in 32.12 seconds; builder check passed for 98 papers / 129 pages.
+- The external archive's validator checked 279 HTML pages / 9,903 local references
+  with zero errors; all 133 source reports/chapters retained their original hashes.
+- Its Chromium sweep checked all 98 reports with no image, Mermaid, MathJax,
+  JavaScript or mobile overflow errors. HTTP smoke verified the real view URL,
+  index search, formulas and supplemental-note navigation; served index/CSS/extension
+  bytes matched local files. No persistent HTTP server was started.
+- Legacy paper claims were not reverified against all original PDFs. The migration
+  records identify unavailable source links and keep 94 unknown reading dates null.
